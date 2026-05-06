@@ -32,7 +32,6 @@
       padding: 48px 20px;
     }
 
-    /* Decorative background */
     body::before {
       content: '';
       position: fixed;
@@ -55,349 +54,263 @@
       margin-bottom: 40px;
       animation: fadeDown 0.6s ease both;
     }
-
     header .eyebrow {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 10px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 10px;
     }
-
     header h1 {
       font-family: 'DM Serif Display', serif;
       font-size: clamp(2rem, 5vw, 3rem);
-      color: var(--text);
-      line-height: 1.1;
+      color: var(--text); line-height: 1.1;
     }
-
-    header p {
-      margin-top: 10px;
-      color: var(--text-muted);
-      font-size: 15px;
-      font-weight: 300;
-    }
+    header p { margin-top: 10px; color: var(--text-muted); font-size: 15px; font-weight: 300; }
 
     .card {
       background: var(--surface);
-      border-radius: 20px;
-      padding: 36px;
+      border-radius: 20px; padding: 36px;
       box-shadow: var(--shadow);
-      width: 100%;
-      max-width: 560px;
+      width: 100%; max-width: 560px;
       animation: fadeUp 0.6s ease both;
       animation-delay: 0.1s;
     }
-
-    .card + .card {
-      margin-top: 24px;
-      animation-delay: 0.2s;
-    }
+    .card + .card { margin-top: 24px; animation-delay: 0.2s; }
 
     .card-title {
       font-family: 'DM Serif Display', serif;
-      font-size: 1.2rem;
-      margin-bottom: 24px;
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-size: 1.2rem; margin-bottom: 24px;
+      color: var(--text); display: flex; align-items: center; gap: 10px;
     }
-
     .card-title .dot {
       width: 10px; height: 10px;
-      background: var(--accent);
-      border-radius: 50%;
-      flex-shrink: 0;
+      background: var(--accent); border-radius: 50%; flex-shrink: 0;
     }
 
     .inputs-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 24px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 16px; margin-bottom: 24px;
     }
 
     label {
-      display: block;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 8px;
+      display: block; font-size: 11px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 8px;
     }
 
     input[type="date"] {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1.5px solid var(--border);
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      color: var(--text);
-      background: var(--bg);
-      transition: border-color 0.2s, box-shadow 0.2s;
-      outline: none;
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      color: var(--text); background: var(--bg);
+      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
     }
-
     input[type="date"]:focus {
       border-color: var(--accent);
       box-shadow: 0 0 0 3px rgba(42,92,69,0.12);
     }
 
     button {
-      width: 100%;
-      padding: 14px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.5px;
+      width: 100%; padding: 14px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      font-weight: 600; cursor: pointer; letter-spacing: 0.5px;
       transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
     }
-
-    button:hover {
-      background: #1e4433;
-      box-shadow: 0 4px 16px rgba(42,92,69,0.3);
-    }
-
+    button:hover { background: #1e4433; box-shadow: 0 4px 16px rgba(42,92,69,0.3); }
     button:active { transform: scale(0.98); }
 
-    /* Results */
-    #resultado {
-      margin-top: 28px;
-      display: none;
+    .btn-secondary {
+      background: transparent; color: var(--text-muted);
+      border: 1.5px solid var(--border); font-size: 12px;
+      padding: 8px 14px; width: auto; letter-spacing: 0.5px;
+      margin-top: 10px;
     }
+    .btn-secondary:hover { background: var(--bg); box-shadow: none; color: var(--text); }
+
+    /* Results */
+    #resultado { margin-top: 28px; display: none; }
 
     .result-total {
-      text-align: center;
-      background: var(--accent-light);
-      border-radius: 12px;
-      padding: 18px;
-      margin-bottom: 20px;
+      text-align: center; background: var(--accent-light);
+      border-radius: 12px; padding: 18px; margin-bottom: 20px;
     }
-
     .result-total .num {
       font-family: 'DM Serif Display', serif;
-      font-size: 2.8rem;
-      color: var(--accent);
-      line-height: 1;
+      font-size: 2.8rem; color: var(--accent); line-height: 1;
     }
-
     .result-total .lbl {
-      font-size: 12px;
-      font-weight: 600;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-top: 4px;
-      opacity: 0.8;
+      font-size: 12px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent); margin-top: 4px; opacity: 0.8;
     }
 
-    .result-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
+    .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
-    .result-box {
-      border-radius: 12px;
-      padding: 18px 16px;
-      text-align: center;
-    }
-
-    .result-box.habiles {
-      background: #EAF5EE;
-      border: 1.5px solid #A8D5B5;
-    }
-
-    .result-box.inhabiles {
-      background: #FDECEA;
-      border: 1.5px solid #F0B3AE;
-    }
+    .result-box { border-radius: 12px; padding: 18px 16px; text-align: center; }
+    .result-box.habiles  { background: #EAF5EE; border: 1.5px solid #A8D5B5; }
+    .result-box.inhabiles { background: #FDECEA; border: 1.5px solid #F0B3AE; }
 
     .result-box .num {
       font-family: 'DM Serif Display', serif;
-      font-size: 2.4rem;
-      line-height: 1;
+      font-size: 2.4rem; line-height: 1;
     }
-
-    .result-box.habiles .num { color: #1E7A3E; }
+    .result-box.habiles .num  { color: #1E7A3E; }
     .result-box.inhabiles .num { color: var(--red); }
 
     .result-box .lbl {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      margin-top: 6px;
-      opacity: 0.75;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; margin-top: 6px; opacity: 0.75;
     }
-
-    .result-box.habiles .lbl { color: #1E7A3E; }
+    .result-box.habiles .lbl  { color: #1E7A3E; }
     .result-box.inhabiles .lbl { color: var(--red); }
 
-    .result-box .sublbl {
-      font-size: 11px;
-      color: var(--text-muted);
-      margin-top: 4px;
+    .result-box .sublbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Breakdown strip */
+    .breakdown {
+      margin-top: 14px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border);
+      overflow: hidden;
+      font-size: 13px;
     }
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 9px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row .br-label { color: var(--text-muted); }
+    .breakdown-row .br-val { font-weight: 600; color: var(--text); }
+    .breakdown-row.highlight-hab  { background: #F3FBF5; }
+    .breakdown-row.highlight-feri { background: #FFFBF0; }
+    .breakdown-row.highlight-wknd { background: #FEF9F9; }
 
     /* Holiday list */
     .holiday-list {
-      margin-top: 20px;
-      border-radius: 12px;
-      overflow: hidden;
-      border: 1.5px solid #F0C97A;
+      margin-top: 20px; border-radius: 12px;
+      overflow: hidden; border: 1.5px solid #F0C97A;
     }
-
     .holiday-list-header {
-      background: #FEF3DC;
-      padding: 10px 16px;
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      color: #8A6100;
-      display: flex;
-      align-items: center;
-      gap: 6px;
+      background: #FEF3DC; padding: 10px 16px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: #8A6100; display: flex; align-items: center; gap: 6px;
     }
-
     .holiday-item {
-      display: flex;
-      align-items: center;
+      display: flex; align-items: center;
       justify-content: space-between;
-      padding: 10px 16px;
-      border-top: 1px solid #F0E4BE;
-      background: #FFFBF0;
-      font-size: 13px;
-      gap: 8px;
+      padding: 10px 16px; border-top: 1px solid #F0E4BE;
+      background: #FFFBF0; font-size: 13px; gap: 8px;
     }
-
     .holiday-item .h-name { color: var(--text); font-weight: 500; }
     .holiday-item .h-date { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
     .holiday-item .h-tag {
-      font-size: 10px;
-      font-weight: 600;
-      letter-spacing: 1px;
-      padding: 2px 7px;
-      border-radius: 20px;
-      white-space: nowrap;
+      font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      padding: 2px 7px; border-radius: 20px; white-space: nowrap;
     }
     .h-tag.weekend { background: #FDECEA; color: var(--red); }
     .h-tag.weekday { background: #FEF3DC; color: #8A6100; }
 
     .no-holidays {
-      padding: 12px 16px;
-      background: #FFFBF0;
-      font-size: 13px;
-      color: var(--text-muted);
+      padding: 12px 16px; background: #FFFBF0;
+      font-size: 13px; color: var(--text-muted);
       border-top: 1px solid #F0E4BE;
     }
 
     .error {
-      text-align: center;
-      color: var(--red);
-      font-size: 14px;
-      padding: 12px;
-      background: #FDECEA;
-      border-radius: 10px;
+      text-align: center; color: var(--red); font-size: 14px;
+      padding: 12px; background: #FDECEA; border-radius: 10px;
     }
 
     /* Reference Table */
-    .ref-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-    }
-
-    .ref-table thead tr {
-      background: var(--accent);
-      color: #fff;
-    }
-
+    .ref-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .ref-table thead tr { background: var(--accent); color: #fff; }
     .ref-table thead th {
-      padding: 12px 16px;
-      font-weight: 600;
-      font-size: 11px;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-      text-align: center;
+      padding: 12px 16px; font-weight: 600;
+      font-size: 11px; letter-spacing: 1.5px;
+      text-transform: uppercase; text-align: center;
     }
-
     .ref-table thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
-    .ref-table thead th:last-child { border-radius: 0 8px 0 0; }
-
-    .ref-table tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
+    .ref-table thead th:last-child  { border-radius: 0 8px 0 0; }
+    .ref-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
     .ref-table tbody tr:last-child { border-bottom: none; }
     .ref-table tbody tr:hover { background: var(--bg); }
-
-    .ref-table tbody td {
-      padding: 14px 16px;
-      text-align: center;
-    }
-
+    .ref-table tbody td { padding: 14px 16px; text-align: center; }
     .ref-table tbody td:first-child {
-      text-align: left;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      text-align: left; font-weight: 600;
+      display: flex; align-items: center; gap: 8px;
     }
-
-    .season-icon {
-      font-size: 18px;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-    }
-
+    .season-icon { font-size: 18px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
     .badge-total { background: var(--accent-light); color: var(--accent); }
-    .badge-hab { background: #EAF5EE; color: #1E7A3E; }
+    .badge-hab   { background: #EAF5EE; color: #1E7A3E; }
     .badge-inhab { background: #FDECEA; color: var(--red); }
+
+    /* ── History ── */
+    .history-card {
+      background: var(--surface);
+      border-radius: 20px; padding: 36px;
+      box-shadow: var(--shadow);
+      width: 100%; max-width: 560px;
+      margin-top: 24px;
+      animation: fadeUp 0.6s ease both;
+      animation-delay: 0.3s;
+    }
+    .history-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 16px;
+    }
+    .history-empty {
+      font-size: 13px; color: var(--text-muted);
+      text-align: center; padding: 16px 0;
+    }
+    .history-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+    }
+    .history-table thead tr { background: var(--bg); }
+    .history-table thead th {
+      padding: 8px 12px; font-size: 10px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); text-align: left;
+      border-bottom: 1.5px solid var(--border);
+    }
+    .history-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background 0.12s; cursor: pointer;
+    }
+    .history-table tbody tr:last-child { border-bottom: none; }
+    .history-table tbody tr:hover { background: var(--accent-light); }
+    .history-table tbody td { padding: 10px 12px; color: var(--text); }
+    .history-table tbody td:first-child { color: var(--text-muted); font-size: 12px; }
+    .ht-hab   { color: #1E7A3E; font-weight: 600; }
+    .ht-inhab { color: var(--red); font-weight: 600; }
+    .ht-total { font-weight: 600; }
+    .ht-range { font-size: 11px; color: var(--text-muted); }
 
     /* Animations */
     @keyframes fadeDown {
       from { opacity: 0; transform: translateY(-16px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeUp {
       from { opacity: 0; transform: translateY(20px); }
       to   { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes pop {
       0%   { transform: scale(0.7); opacity: 0; }
       70%  { transform: scale(1.05); }
       100% { transform: scale(1); opacity: 1; }
     }
-
     .pop { animation: pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
 
     footer {
-      margin-top: 40px;
-      font-size: 12px;
-      color: var(--text-muted);
-      text-align: center;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.3s;
+      margin-top: 40px; font-size: 12px;
+      color: var(--text-muted); text-align: center;
+      animation: fadeUp 0.6s ease both; animation-delay: 0.4s;
     }
 
     @media (max-width: 480px) {
@@ -418,7 +331,6 @@
   <!-- Calculator Card -->
   <div class="card">
     <div class="card-title"><span class="dot"></span>Rango de Fechas</div>
-
     <div class="inputs-row">
       <div>
         <label for="fechaInicio">Fecha Inicio</label>
@@ -429,12 +341,8 @@
         <input type="date" id="fechaFin" />
       </div>
     </div>
-
     <button onclick="calcular()">Calcular Días</button>
-
-    <div id="resultado">
-      <div id="resultado-content"></div>
-    </div>
+    <div id="resultado"><div id="resultado-content"></div></div>
   </div>
 
   <!-- Reference Table Card -->
@@ -465,111 +373,96 @@
       </tbody>
     </table>
     <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">
-      Hábiles = Lunes a Viernes &nbsp;·&nbsp; Inhábiles = Sábados y Domingos
+      Hábiles = Lunes a Viernes &nbsp;·&nbsp; Inhábiles = Sábados, Domingos y Feriados
     </p>
+  </div>
+
+  <!-- History Card -->
+  <div class="history-card">
+    <div class="history-header">
+      <div class="card-title" style="margin-bottom:0"><span class="dot"></span>Historial de Búsquedas</div>
+      <button class="btn-secondary" onclick="clearHistory()">Limpiar</button>
+    </div>
+    <div id="history-content"><div class="history-empty">Aún no hay búsquedas registradas.</div></div>
   </div>
 
   <footer>Considera L–V como días hábiles. Feriados nacionales incluidos (2020–2035).</footer>
 
   <script>
-    // ── Easter Sunday (Gregorian algorithm) ──────────────────────────────
+    // ── Easter Sunday ────────────────────────────────────────────────────
     function getEaster(y) {
-      const a = y % 19, b = Math.floor(y/100), c = y % 100;
-      const d = Math.floor(b/4), e = b % 4, f = Math.floor((b+8)/25);
-      const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15) % 30;
-      const i = Math.floor(c/4), k = c % 4, l = (32+2*e+2*i-h-k) % 7;
+      const a = y%19, b = Math.floor(y/100), c = y%100;
+      const d = Math.floor(b/4), e = b%4, f = Math.floor((b+8)/25);
+      const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15)%30;
+      const i = Math.floor(c/4), k = c%4, l = (32+2*e+2*i-h-k)%7;
       const m = Math.floor((a+11*h+22*l)/451);
       const month = Math.floor((h+l-7*m+114)/31);
-      const day   = ((h+l-7*m+114) % 31) + 1;
+      const day   = ((h+l-7*m+114)%31)+1;
       return new Date(y, month-1, day);
     }
 
-    // ── Nearest Monday to a given MM-DD ──────────────────────────────────
+    // ── Nearest Monday ───────────────────────────────────────────────────
     function nearestMonday(y, month, day) {
-      const d   = new Date(y, month-1, day);
-      const dow = d.getDay(); // 0=Sun…6=Sat
-      const deltas = [1, 0, -1, -2, -3, 3, 2]; // Sun Mon Tue Wed Thu Fri Sat
-      d.setDate(d.getDate() + deltas[dow]);
+      const d = new Date(y, month-1, day);
+      const deltas = [1,0,-1,-2,-3,3,2];
+      d.setDate(d.getDate() + deltas[d.getDay()]);
       return d;
     }
 
-    // ── Build Set of holiday date-strings for a given year ────────────────
+    // ── Chilean Holidays ─────────────────────────────────────────────────
     function getChileanHolidays(y) {
-      const holidays = []; // [{date, name}]
+      const holidays = [];
+      const add = (date, name) => holidays.push({ key: fmtKey(date), name });
 
-      const add = (date, name) => {
-        holidays.push({ key: fmtKey(date), name, date: new Date(date) });
-      };
+      [[1,1,'Año Nuevo'],[5,1,'Día del Trabajo'],[5,21,'Glorias Navales'],
+       [7,16,'Virgen del Carmen'],[8,15,'Asunción de la Virgen'],
+       [9,18,'Independencia Nacional'],[9,19,'Glorias del Ejército'],
+       [10,31,'Iglesias Evangélicas y Protestantes'],
+       [11,1,'Día de Todos los Santos'],[12,8,'Inmaculada Concepción'],
+       [12,25,'Navidad']
+      ].forEach(([m,d,n]) => add(new Date(y, m-1, d), n));
 
-      const fixed = [
-        [1,  1,  'Año Nuevo'],
-        [5,  1,  'Día del Trabajo'],
-        [5,  21, 'Glorias Navales'],
-        [7,  16, 'Virgen del Carmen'],
-        [8,  15, 'Asunción de la Virgen'],
-        [9,  18, 'Independencia Nacional'],
-        [9,  19, 'Glorias del Ejército'],
-        [10, 31, 'Iglesias Evangélicas y Protestantes'],
-        [11, 1,  'Día de Todos los Santos'],
-        [12, 8,  'Inmaculada Concepción'],
-        [12, 25, 'Navidad'],
-      ];
-
-      fixed.forEach(([m, d, n]) => add(new Date(y, m-1, d), n));
-
-      // Semana Santa
       const easter = getEaster(y);
-      const viernesSanto = new Date(easter); viernesSanto.setDate(easter.getDate() - 2);
-      const sabadoSanto  = new Date(easter); sabadoSanto.setDate(easter.getDate() - 1);
-      add(viernesSanto, 'Viernes Santo');
-      add(sabadoSanto,  'Sábado Santo');
+      const vs = new Date(easter); vs.setDate(easter.getDate()-2);
+      const ss = new Date(easter); ss.setDate(easter.getDate()-1);
+      add(vs, 'Viernes Santo');
+      add(ss, 'Sábado Santo');
 
-      // Día Nacional de los Pueblos Indígenas → nearest Monday to Jun 21
-      add(nearestMonday(y, 6, 21), 'Día de los Pueblos Indígenas');
+      add(nearestMonday(y,6,21), 'Día de los Pueblos Indígenas');
+      add(nearestMonday(y,6,29), 'San Pedro y San Pablo');
+      add(nearestMonday(y,10,12), 'Encuentro de Dos Mundos');
 
-      // San Pedro y San Pablo (Jun 29) → nearest Monday
-      add(nearestMonday(y, 6, 29), 'San Pedro y San Pablo');
+      if (new Date(y,0,1).getDay()===6) add(new Date(y,0,2), 'Feriado por Año Nuevo (traslado)');
 
-      // Encuentro de Dos Mundos (Oct 12) → nearest Monday
-      add(nearestMonday(y, 10, 12), 'Encuentro de Dos Mundos');
-
-      // Año Nuevo 2 (Jan 2) when Jan 1 falls on Saturday
-      if (new Date(y, 0, 1).getDay() === 6) {
-        add(new Date(y, 0, 2), 'Feriado por Año Nuevo (traslado)');
-      }
-
-      // Deduplicate by key (some moveable might overlap fixed)
       const seen = new Set();
-      return holidays.filter(h => {
-        if (seen.has(h.key)) return false;
-        seen.add(h.key);
-        return true;
-      });
+      return holidays.filter(h => { if(seen.has(h.key))return false; seen.add(h.key); return true; });
     }
 
     function fmtKey(d) {
       return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     }
 
-    // Build holiday map for a range of years
     function buildHolidayMap(y1, y2) {
       const map = {};
-      for (let y = y1; y <= y2; y++) {
-        getChileanHolidays(y).forEach(h => { map[h.key] = h.name; });
-      }
+      for (let y=y1; y<=y2; y++) getChileanHolidays(y).forEach(h => { map[h.key]=h.name; });
       return map;
     }
 
-    // ── Init ──────────────────────────────────────────────────────────────
-    const today = new Date();
-    const later = new Date();
-    later.setDate(today.getDate() + 7);
+    // ── Init dates ───────────────────────────────────────────────────────
+    const todayD = new Date();
+    const laterD = new Date(); laterD.setDate(todayD.getDate()+7);
+    const fmtISO = d => d.toISOString().split('T')[0];
+    document.getElementById('fechaInicio').value = fmtISO(todayD);
+    document.getElementById('fechaFin').value    = fmtISO(laterD);
 
-    const fmt = d => d.toISOString().split('T')[0];
-    document.getElementById('fechaInicio').value = fmt(today);
-    document.getElementById('fechaFin').value = fmt(later);
+    // Enter key triggers calculation
+    ['fechaInicio','fechaFin'].forEach(id => {
+      document.getElementById(id).addEventListener('keydown', e => {
+        if (e.key === 'Enter') calcular();
+      });
+    });
 
-    // ── Main calculator ───────────────────────────────────────────────────
+    // ── Main calculator ──────────────────────────────────────────────────
     function calcular() {
       const inicio = document.getElementById('fechaInicio').value;
       const fin    = document.getElementById('fechaFin').value;
@@ -579,107 +472,216 @@
       res.style.display = 'block';
 
       if (!inicio || !fin) {
-        cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>';
-        return;
+        cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>'; return;
       }
 
-      const d1 = new Date(inicio + 'T00:00:00');
-      const d2 = new Date(fin    + 'T00:00:00');
+      const d1 = new Date(inicio+'T00:00:00');
+      const d2 = new Date(fin+'T00:00:00');
 
       if (d2 < d1) {
-        cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior a la fecha de inicio.</div>';
-        return;
+        cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior a la fecha de inicio.</div>'; return;
       }
 
       const holidayMap = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
 
-      let habiles   = 0;
-      let inhabiles = 0;
-      let feriados  = 0;
+      let habilesPuros  = 0; // weekday, no holiday
+      let feriadosWeekday = 0; // weekday AND holiday
+      let finDeSemana   = 0; // weekend (holiday or not)
       const feriadosEnRango = [];
-      let cursor = new Date(d1);
 
+      let cursor = new Date(d1);
       while (cursor <= d2) {
-        const dow = cursor.getDay();
-        const key = fmtKey(cursor);
-        const isWeekend = (dow === 0 || dow === 6);
+        const dow       = cursor.getDay();
+        const key       = fmtKey(cursor);
+        const isWeekend = (dow===0 || dow===6);
         const isFeriado = !!holidayMap[key];
 
         if (isWeekend) {
-          inhabiles++;
-          if (isFeriado) {
-            // Holiday falls on weekend — still inhábil but note it
-            feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: true, dow });
-          }
+          finDeSemana++;
+          if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: true });
         } else {
           if (isFeriado) {
-            inhabiles++;
-            feriados++;
-            feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: false, dow });
+            feriadosWeekday++;
+            feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: false });
           } else {
-            habiles++;
+            habilesPuros++;
           }
         }
-
-        cursor.setDate(cursor.getDate() + 1);
+        cursor.setDate(cursor.getDate()+1);
       }
 
-      const total = habiles + inhabiles;
-      const pctHab   = Math.round((habiles   / total) * 100);
-      const pctInhab = Math.round((inhabiles / total) * 100);
+      const totalHabiles   = habilesPuros;          // only pure weekdays
+      const totalInhabiles = finDeSemana + feriadosWeekday;
+      const total          = totalHabiles + totalInhabiles;
 
-      const opts = { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' };
+      const pctHab   = Math.round((totalHabiles   / total) * 100);
+      const pctInhab = Math.round((totalInhabiles / total) * 100);
+
+      const opts = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
       const fmtD1 = d1.toLocaleDateString('es-CL', opts);
       const fmtD2 = d2.toLocaleDateString('es-CL', opts);
 
-      const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const dayNames   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
       const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
-      const feriadoRows = feriadosEnRango.length === 0
-        ? `<div class="no-holidays">Sin feriados nacionales en este período.</div>`
-        : feriadosEnRango.map(f => {
-            const d = new Date(f.key + 'T00:00:00');
-            const label = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-            const tag = f.onWeekend
-              ? `<span class="h-tag weekend">Fin de semana</span>`
-              : `<span class="h-tag weekday">Día hábil</span>`;
+      // Breakdown strip
+      const breakdown = `
+        <div class="breakdown pop" style="animation-delay:0.2s">
+          <div class="breakdown-row highlight-hab">
+            <span class="br-label">📅 Días hábiles (L–V sin feriado)</span>
+            <span class="br-val" style="color:#1E7A3E">${habilesPuros}</span>
+          </div>
+          <div class="breakdown-row highlight-wknd">
+            <span class="br-label">📆 Fines de semana (S–D)</span>
+            <span class="br-val" style="color:var(--red)">${finDeSemana}</span>
+          </div>
+          <div class="breakdown-row highlight-feri">
+            <span class="br-label">🎌 Feriados en días hábiles</span>
+            <span class="br-val" style="color:#8A6100">${feriadosWeekday}</span>
+          </div>
+        </div>`;
+
+      // Holiday list (weekday holidays only — the important ones)
+      const weekdayFeriados = feriadosEnRango.filter(f => !f.onWeekend);
+      const weekendFeriados = feriadosEnRango.filter(f => f.onWeekend);
+
+      let feriadoRows = '';
+      if (feriadosEnRango.length === 0) {
+        feriadoRows = `<div class="no-holidays">Sin feriados nacionales en este período.</div>`;
+      } else {
+        if (weekdayFeriados.length > 0) {
+          feriadoRows += weekdayFeriados.map(f => {
+            const d   = new Date(f.key+'T00:00:00');
+            const lbl = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
             return `<div class="holiday-item">
-              <span class="h-name">🗓 ${f.name}</span>
-              <span class="h-date">${label}</span>
-              ${tag}
+              <span class="h-name">🎌 ${f.name}</span>
+              <span class="h-date">${lbl}</span>
+              <span class="h-tag weekday">Resta hábil</span>
             </div>`;
           }).join('');
-
-      const feriadosWeekday = feriadosEnRango.filter(f => !f.onWeekend).length;
-      const sublblInhab = feriados > 0
-        ? `S-D + ${feriados} feriado${feriados > 1 ? 's' : ''} · ${pctInhab}%`
-        : `Sábado y Domingo · ${pctInhab}%`;
+        }
+        if (weekendFeriados.length > 0) {
+          feriadoRows += weekendFeriados.map(f => {
+            const d   = new Date(f.key+'T00:00:00');
+            const lbl = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+            return `<div class="holiday-item">
+              <span class="h-name">📆 ${f.name}</span>
+              <span class="h-date">${lbl}</span>
+              <span class="h-tag weekend">Fin de semana</span>
+            </div>`;
+          }).join('');
+        }
+      }
 
       cont.innerHTML = `
         <div class="result-total pop">
           <div class="num">${total}</div>
           <div class="lbl">Días Totales</div>
-          <div style="font-size:12px; color:var(--accent); opacity:0.7; margin-top:4px;">${fmtD1} — ${fmtD2}</div>
+          <div style="font-size:12px;color:var(--accent);opacity:0.7;margin-top:4px">${fmtD1} — ${fmtD2}</div>
         </div>
         <div class="result-row">
           <div class="result-box habiles pop" style="animation-delay:0.08s">
-            <div class="num">${habiles}</div>
+            <div class="num">${totalHabiles}</div>
             <div class="lbl">Hábiles</div>
             <div class="sublbl">Lunes–Viernes · ${pctHab}%</div>
           </div>
           <div class="result-box inhabiles pop" style="animation-delay:0.16s">
-            <div class="num">${inhabiles}</div>
+            <div class="num">${totalInhabiles}</div>
             <div class="lbl">Inhábiles</div>
-            <div class="sublbl">${sublblInhab}</div>
+            <div class="sublbl">S-D + feriados · ${pctInhab}%</div>
           </div>
         </div>
-        <div class="holiday-list pop" style="animation-delay:0.24s">
+        ${breakdown}
+        <div class="holiday-list pop" style="animation-delay:0.28s">
           <div class="holiday-list-header">🎌 Feriados en el período</div>
           ${feriadoRows}
-        </div>
-      `;
+        </div>`;
+
+      // Save to history
+      saveHistory({
+        time:      new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'}),
+        date:      new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}),
+        inicio:    fmtD1,
+        fin:       fmtD2,
+        inicioISO: inicio,   // raw ISO for restore
+        finISO:    fin,
+        total,
+        habiles:   totalHabiles,
+        inhabiles: totalInhabiles,
+        feriados:  feriadosWeekday
+      });
     }
 
+    // ── History ──────────────────────────────────────────────────────────
+    const HISTORY_KEY = 'diasHabilesHistory';
+
+    function loadHistory() {
+      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveHistory(entry) {
+      const hist = loadHistory();
+      hist.unshift(entry);           // newest first
+      if (hist.length > 20) hist.pop(); // cap at 20
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+      renderHistory();
+    }
+
+    function clearHistory() {
+      localStorage.removeItem(HISTORY_KEY);
+      renderHistory();
+    }
+
+    function renderHistory() {
+      const hist = loadHistory();
+      const el   = document.getElementById('history-content');
+
+      if (hist.length === 0) {
+        el.innerHTML = '<div class="history-empty">Aún no hay búsquedas registradas.</div>';
+        return;
+      }
+
+      const rows = hist.map((h, i) => `
+        <tr onclick="restoreSearch(${i})" title="Click para cargar estas fechas">
+          <td>${h.date} ${h.time}</td>
+          <td class="ht-range">${h.inicio} → ${h.fin}</td>
+          <td class="ht-total">${h.total}</td>
+          <td class="ht-hab">${h.habiles}</td>
+          <td class="ht-inhab">${h.inhabiles}</td>
+        </tr>`).join('');
+
+      el.innerHTML = `
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Hora</th>
+              <th>Período</th>
+              <th>Total</th>
+              <th>Hábiles</th>
+              <th>Inhábiles</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <p style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:right">
+          Haz clic en una fila para cargar esas fechas
+        </p>`;
+    }
+
+    // Restore a previous search by clicking history row
+    function restoreSearch(index) {
+      const hist  = loadHistory();
+      const entry = hist[index];
+      if (!entry || !entry.inicioISO) return;
+      document.getElementById('fechaInicio').value = entry.inicioISO;
+      document.getElementById('fechaFin').value    = entry.finISO;
+      calcular();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── Run on load ──────────────────────────────────────────────────────
+    renderHistory();
     calcular();
   </script>
 
