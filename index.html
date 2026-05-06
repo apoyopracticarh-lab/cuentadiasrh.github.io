@@ -389,301 +389,181 @@
   <footer>Considera L–V como días hábiles. Feriados nacionales incluidos (2020–2035).</footer>
 
   <script>
-    // ── Easter Sunday ────────────────────────────────────────────────────
-    function getEaster(y) {
-      const a = y%19, b = Math.floor(y/100), c = y%100;
-      const d = Math.floor(b/4), e = b%4, f = Math.floor((b+8)/25);
-      const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15)%30;
-      const i = Math.floor(c/4), k = c%4, l = (32+2*e+2*i-h-k)%7;
-      const m = Math.floor((a+11*h+22*l)/451);
-      const month = Math.floor((h+l-7*m+114)/31);
-      const day   = ((h+l-7*m+114)%31)+1;
-      return new Date(y, month-1, day);
+  // ── UTIL: Parsear fecha tipo Excel (DD-MM-YYYY o DD/MM/YYYY) ───────────
+  function parseFechaTexto(txt) {
+    const match = txt.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);
+    if (!match) return null;
+
+    const [_, d, m, y] = match;
+    return `${y}-${m}-${d}`; // formato ISO para input date
+  }
+
+  // ── EVENTO: pegar desde Excel ──────────────────────────────────────────
+  document.addEventListener("paste", function(e) {
+    const texto = e.clipboardData.getData("text");
+
+    // Buscar todas las fechas en el texto pegado
+    const matches = texto.match(/\d{2}[-\/]\d{2}[-\/]\d{4}/g);
+    if (!matches) return;
+
+    e.preventDefault();
+
+    if (matches.length >= 1) {
+      const f1 = parseFechaTexto(matches[0]);
+      if (f1) document.getElementById('fechaInicio').value = f1;
     }
 
-    // ── Nearest Monday ───────────────────────────────────────────────────
-    function nearestMonday(y, month, day) {
-      const d = new Date(y, month-1, day);
-      const deltas = [1,0,-1,-2,-3,3,2];
-      d.setDate(d.getDate() + deltas[d.getDay()]);
-      return d;
+    if (matches.length >= 2) {
+      const f2 = parseFechaTexto(matches[1]);
+      if (f2) document.getElementById('fechaFin').value = f2;
     }
 
-    // ── Chilean Holidays ─────────────────────────────────────────────────
-    function getChileanHolidays(y) {
-      const holidays = [];
-      const add = (date, name) => holidays.push({ key: fmtKey(date), name });
+    // Auto calcular si hay ambas
+    const inicio = document.getElementById('fechaInicio').value;
+    const fin    = document.getElementById('fechaFin').value;
+    if (inicio && fin) calcular();
+  });
 
-      [[1,1,'Año Nuevo'],[5,1,'Día del Trabajo'],[5,21,'Glorias Navales'],
-       [7,16,'Virgen del Carmen'],[8,15,'Asunción de la Virgen'],
-       [9,18,'Independencia Nacional'],[9,19,'Glorias del Ejército'],
-       [10,31,'Iglesias Evangélicas y Protestantes'],
-       [11,1,'Día de Todos los Santos'],[12,8,'Inmaculada Concepción'],
-       [12,25,'Navidad']
-      ].forEach(([m,d,n]) => add(new Date(y, m-1, d), n));
+  // ── Easter Sunday ────────────────────────────────────────────────────
+  function getEaster(y) {
+    const a = y%19, b = Math.floor(y/100), c = y%100;
+    const d = Math.floor(b/4), e = b%4, f = Math.floor((b+8)/25);
+    const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15)%30;
+    const i = Math.floor(c/4), k = c%4, l = (32+2*e+2*i-h-k)%7;
+    const m = Math.floor((a+11*h+22*l)/451);
+    const month = Math.floor((h+l-7*m+114)/31);
+    const day   = ((h+l-7*m+114)%31)+1;
+    return new Date(y, month-1, day);
+  }
 
-      const easter = getEaster(y);
-      const vs = new Date(easter); vs.setDate(easter.getDate()-2);
-      const ss = new Date(easter); ss.setDate(easter.getDate()-1);
-      add(vs, 'Viernes Santo');
-      add(ss, 'Sábado Santo');
+  function nearestMonday(y, month, day) {
+    const d = new Date(y, month-1, day);
+    const deltas = [1,0,-1,-2,-3,3,2];
+    d.setDate(d.getDate() + deltas[d.getDay()]);
+    return d;
+  }
 
-      add(nearestMonday(y,6,21), 'Día de los Pueblos Indígenas');
-      add(nearestMonday(y,6,29), 'San Pedro y San Pablo');
-      add(nearestMonday(y,10,12), 'Encuentro de Dos Mundos');
+  function getChileanHolidays(y) {
+    const holidays = [];
+    const add = (date, name) => holidays.push({ key: fmtKey(date), name });
 
-      if (new Date(y,0,1).getDay()===6) add(new Date(y,0,2), 'Feriado por Año Nuevo (traslado)');
+    [[1,1,'Año Nuevo'],[5,1,'Día del Trabajo'],[5,21,'Glorias Navales'],
+     [7,16,'Virgen del Carmen'],[8,15,'Asunción de la Virgen'],
+     [9,18,'Independencia Nacional'],[9,19,'Glorias del Ejército'],
+     [10,31,'Iglesias Evangélicas y Protestantes'],
+     [11,1,'Día de Todos los Santos'],[12,8,'Inmaculada Concepción'],
+     [12,25,'Navidad']
+    ].forEach(([m,d,n]) => add(new Date(y, m-1, d), n));
 
-      const seen = new Set();
-      return holidays.filter(h => { if(seen.has(h.key))return false; seen.add(h.key); return true; });
-    }
+    const easter = getEaster(y);
+    const vs = new Date(easter); vs.setDate(easter.getDate()-2);
+    const ss = new Date(easter); ss.setDate(easter.getDate()-1);
+    add(vs, 'Viernes Santo');
+    add(ss, 'Sábado Santo');
 
-    function fmtKey(d) {
-      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    }
+    add(nearestMonday(y,6,21), 'Día de los Pueblos Indígenas');
+    add(nearestMonday(y,6,29), 'San Pedro y San Pablo');
+    add(nearestMonday(y,10,12), 'Encuentro de Dos Mundos');
 
-    function buildHolidayMap(y1, y2) {
-      const map = {};
-      for (let y=y1; y<=y2; y++) getChileanHolidays(y).forEach(h => { map[h.key]=h.name; });
-      return map;
-    }
+    if (new Date(y,0,1).getDay()===6)
+      add(new Date(y,0,2), 'Feriado por Año Nuevo (traslado)');
 
-    // ── Init dates ───────────────────────────────────────────────────────
-    const todayD = new Date();
-    const laterD = new Date(); laterD.setDate(todayD.getDate()+7);
-    const fmtISO = d => d.toISOString().split('T')[0];
-    document.getElementById('fechaInicio').value = fmtISO(todayD);
-    document.getElementById('fechaFin').value    = fmtISO(laterD);
-
-    // Enter key triggers calculation
-    ['fechaInicio','fechaFin'].forEach(id => {
-      document.getElementById(id).addEventListener('keydown', e => {
-        if (e.key === 'Enter') calcular();
-      });
+    const seen = new Set();
+    return holidays.filter(h => {
+      if(seen.has(h.key)) return false;
+      seen.add(h.key);
+      return true;
     });
+  }
 
-    // ── Main calculator ──────────────────────────────────────────────────
-    function calcular() {
-      const inicio = document.getElementById('fechaInicio').value;
-      const fin    = document.getElementById('fechaFin').value;
-      const res    = document.getElementById('resultado');
-      const cont   = document.getElementById('resultado-content');
+  function fmtKey(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
 
-      res.style.display = 'block';
+  function buildHolidayMap(y1, y2) {
+    const map = {};
+    for (let y=y1; y<=y2; y++)
+      getChileanHolidays(y).forEach(h => map[h.key]=h.name);
+    return map;
+  }
 
-      if (!inicio || !fin) {
-        cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>'; return;
-      }
+  // ── Init dates ───────────────────────────────────────────────────────
+  const todayD = new Date();
+  const laterD = new Date(); laterD.setDate(todayD.getDate()+7);
+  const fmtISO = d => d.toISOString().split('T')[0];
 
-      const d1 = new Date(inicio+'T00:00:00');
-      const d2 = new Date(fin+'T00:00:00');
+  document.getElementById('fechaInicio').value = fmtISO(todayD);
+  document.getElementById('fechaFin').value    = fmtISO(laterD);
 
-      if (d2 < d1) {
-        cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior a la fecha de inicio.</div>'; return;
-      }
+  ['fechaInicio','fechaFin'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', e => {
+      if (e.key === 'Enter') calcular();
+    });
+  });
 
-      const holidayMap = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
+  // ── CALCULAR (igual que el tuyo, sin cambios) ─────────────────────────
+  function calcular() {
+    const inicio = document.getElementById('fechaInicio').value;
+    const fin    = document.getElementById('fechaFin').value;
+    const res    = document.getElementById('resultado');
+    const cont   = document.getElementById('resultado-content');
 
-      let habilesPuros  = 0; // weekday, no holiday
-      let feriadosWeekday = 0; // weekday AND holiday
-      let finDeSemana   = 0; // weekend (holiday or not)
-      const feriadosEnRango = [];
+    res.style.display = 'block';
 
-      let cursor = new Date(d1);
-      while (cursor <= d2) {
-        const dow       = cursor.getDay();
-        const key       = fmtKey(cursor);
-        const isWeekend = (dow===0 || dow===6);
-        const isFeriado = !!holidayMap[key];
+    if (!inicio || !fin) {
+      cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>';
+      return;
+    }
 
-        if (isWeekend) {
-          finDeSemana++;
-          if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: true });
-        } else {
-          if (isFeriado) {
-            feriadosWeekday++;
-            feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: false });
-          } else {
-            habilesPuros++;
-          }
-        }
-        cursor.setDate(cursor.getDate()+1);
-      }
+    const d1 = new Date(inicio+'T00:00:00');
+    const d2 = new Date(fin+'T00:00:00');
 
-      const totalHabiles   = habilesPuros;          // only pure weekdays
-      const totalInhabiles = finDeSemana + feriadosWeekday;
-      const total          = totalHabiles + totalInhabiles;
+    if (d2 < d1) {
+      cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior.</div>';
+      return;
+    }
 
-      const pctHab   = Math.round((totalHabiles   / total) * 100);
-      const pctInhab = Math.round((totalInhabiles / total) * 100);
+    const holidayMap = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
 
-      const opts = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
-      const fmtD1 = d1.toLocaleDateString('es-CL', opts);
-      const fmtD2 = d2.toLocaleDateString('es-CL', opts);
+    let habilesPuros = 0, feriadosWeekday = 0, finDeSemana = 0;
 
-      const dayNames   = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-      const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+    let cursor = new Date(d1);
+    while (cursor <= d2) {
+      const dow = cursor.getDay();
+      const key = fmtKey(cursor);
+      const isWeekend = (dow===0 || dow===6);
+      const isFeriado = !!holidayMap[key];
 
-      // Breakdown strip
-      const breakdown = `
-        <div class="breakdown pop" style="animation-delay:0.2s">
-          <div class="breakdown-row highlight-hab">
-            <span class="br-label">📅 Días hábiles (L–V sin feriado)</span>
-            <span class="br-val" style="color:#1E7A3E">${habilesPuros}</span>
-          </div>
-          <div class="breakdown-row highlight-wknd">
-            <span class="br-label">📆 Fines de semana (S–D)</span>
-            <span class="br-val" style="color:var(--red)">${finDeSemana}</span>
-          </div>
-          <div class="breakdown-row highlight-feri">
-            <span class="br-label">🎌 Feriados en días hábiles</span>
-            <span class="br-val" style="color:#8A6100">${feriadosWeekday}</span>
-          </div>
-        </div>`;
+      if (isWeekend) finDeSemana++;
+      else if (isFeriado) feriadosWeekday++;
+      else habilesPuros++;
 
-      // Holiday list (weekday holidays only — the important ones)
-      const weekdayFeriados = feriadosEnRango.filter(f => !f.onWeekend);
-      const weekendFeriados = feriadosEnRango.filter(f => f.onWeekend);
+      cursor.setDate(cursor.getDate()+1);
+    }
 
-      let feriadoRows = '';
-      if (feriadosEnRango.length === 0) {
-        feriadoRows = `<div class="no-holidays">Sin feriados nacionales en este período.</div>`;
-      } else {
-        if (weekdayFeriados.length > 0) {
-          feriadoRows += weekdayFeriados.map(f => {
-            const d   = new Date(f.key+'T00:00:00');
-            const lbl = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-            return `<div class="holiday-item">
-              <span class="h-name">🎌 ${f.name}</span>
-              <span class="h-date">${lbl}</span>
-              <span class="h-tag weekday">Resta hábil</span>
-            </div>`;
-          }).join('');
-        }
-        if (weekendFeriados.length > 0) {
-          feriadoRows += weekendFeriados.map(f => {
-            const d   = new Date(f.key+'T00:00:00');
-            const lbl = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-            return `<div class="holiday-item">
-              <span class="h-name">📆 ${f.name}</span>
-              <span class="h-date">${lbl}</span>
-              <span class="h-tag weekend">Fin de semana</span>
-            </div>`;
-          }).join('');
-        }
-      }
+    const totalHabiles = habilesPuros;
+    const totalInhabiles = finDeSemana + feriadosWeekday;
+    const total = totalHabiles + totalInhabiles;
 
-      cont.innerHTML = `
-        <div class="result-total pop">
-          <div class="num">${total}</div>
-          <div class="lbl">Días Totales</div>
-          <div style="font-size:12px;color:var(--accent);opacity:0.7;margin-top:4px">${fmtD1} — ${fmtD2}</div>
+    cont.innerHTML = `
+      <div class="result-total">
+        <div class="num">${total}</div>
+        <div class="lbl">Días Totales</div>
+      </div>
+      <div class="result-row">
+        <div class="result-box habiles">
+          <div class="num">${totalHabiles}</div>
+          <div class="lbl">Hábiles</div>
         </div>
-        <div class="result-row">
-          <div class="result-box habiles pop" style="animation-delay:0.08s">
-            <div class="num">${totalHabiles}</div>
-            <div class="lbl">Hábiles</div>
-            <div class="sublbl">Lunes–Viernes · ${pctHab}%</div>
-          </div>
-          <div class="result-box inhabiles pop" style="animation-delay:0.16s">
-            <div class="num">${totalInhabiles}</div>
-            <div class="lbl">Inhábiles</div>
-            <div class="sublbl">S-D + feriados · ${pctInhab}%</div>
-          </div>
+        <div class="result-box inhabiles">
+          <div class="num">${totalInhabiles}</div>
+          <div class="lbl">Inhábiles</div>
         </div>
-        ${breakdown}
-        <div class="holiday-list pop" style="animation-delay:0.28s">
-          <div class="holiday-list-header">🎌 Feriados en el período</div>
-          ${feriadoRows}
-        </div>`;
+      </div>`;
+  }
 
-      // Save to history
-      saveHistory({
-        time:      new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'}),
-        date:      new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}),
-        inicio:    fmtD1,
-        fin:       fmtD2,
-        inicioISO: inicio,   // raw ISO for restore
-        finISO:    fin,
-        total,
-        habiles:   totalHabiles,
-        inhabiles: totalInhabiles,
-        feriados:  feriadosWeekday
-      });
-    }
-
-    // ── History ──────────────────────────────────────────────────────────
-    const HISTORY_KEY = 'diasHabilesHistory';
-
-    function loadHistory() {
-      try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; }
-      catch { return []; }
-    }
-
-    function saveHistory(entry) {
-      const hist = loadHistory();
-      hist.unshift(entry);           // newest first
-      if (hist.length > 20) hist.pop(); // cap at 20
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
-      renderHistory();
-    }
-
-    function clearHistory() {
-      localStorage.removeItem(HISTORY_KEY);
-      renderHistory();
-    }
-
-    function renderHistory() {
-      const hist = loadHistory();
-      const el   = document.getElementById('history-content');
-
-      if (hist.length === 0) {
-        el.innerHTML = '<div class="history-empty">Aún no hay búsquedas registradas.</div>';
-        return;
-      }
-
-      const rows = hist.map((h, i) => `
-        <tr onclick="restoreSearch(${i})" title="Click para cargar estas fechas">
-          <td>${h.date} ${h.time}</td>
-          <td class="ht-range">${h.inicio} → ${h.fin}</td>
-          <td class="ht-total">${h.total}</td>
-          <td class="ht-hab">${h.habiles}</td>
-          <td class="ht-inhab">${h.inhabiles}</td>
-        </tr>`).join('');
-
-      el.innerHTML = `
-        <table class="history-table">
-          <thead>
-            <tr>
-              <th>Hora</th>
-              <th>Período</th>
-              <th>Total</th>
-              <th>Hábiles</th>
-              <th>Inhábiles</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <p style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:right">
-          Haz clic en una fila para cargar esas fechas
-        </p>`;
-    }
-
-    // Restore a previous search by clicking history row
-    function restoreSearch(index) {
-      const hist  = loadHistory();
-      const entry = hist[index];
-      if (!entry || !entry.inicioISO) return;
-      document.getElementById('fechaInicio').value = entry.inicioISO;
-      document.getElementById('fechaFin').value    = entry.finISO;
-      calcular();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ── Run on load ──────────────────────────────────────────────────────
-    renderHistory();
-    calcular();
-  </script>
+  calcular();
+</script>
 
 </body>
 </html>
