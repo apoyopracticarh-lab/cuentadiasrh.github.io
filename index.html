@@ -1,569 +1,1873 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Calculadora de Días Hábiles</title>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg: #F5F2EC;
-      --surface: #FFFFFF;
-      --accent: #2A5C45;
-      --accent-light: #D6EAE1;
-      --text: #1A1A1A;
-      --text-muted: #6B6B6B;
-      --border: #E0DDD6;
-      --gold: #B8860B;
-      --red: #C0392B;
-      --shadow: 0 4px 24px rgba(0,0,0,0.08);
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Calculadora de Días Hábiles · Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #F5F2EC;
+            --surface: #FFFFFF;
+            --accent: #2A5C45;
+            --accent-light: #D6EAE1;
+            --accent-glow: rgba(42, 92, 69, 0.12);
+            --text: #1A1A1A;
+            --text-muted: #6B6B6B;
+            --border: #E0DDD6;
+            --gold: #B8860B;
+            --gold-light: #FEF3DC;
+            --red: #C0392B;
+            --red-light: #FDECEA;
+            --green: #1E7A3E;
+            --green-light: #EAF5EE;
+            --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+            --radius: 20px;
+            --radius-sm: 10px;
+            --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px 60px;
+            position: relative;
+        }
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::before {
+            top: -140px;
+            right: -140px;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(42, 92, 69, 0.1) 0%, transparent 70%);
+        }
+        body::after {
+            bottom: -120px;
+            left: -120px;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(184, 134, 11, 0.07) 0%, transparent 70%);
+        }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+        header {
+            text-align: center;
+            margin-bottom: 36px;
+            z-index: 1;
+            animation: fadeDown 0.6s ease both;
+        }
+        header .eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+        header h1 {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(2rem, 5vw, 2.8rem);
+            color: var(--text);
+            line-height: 1.15;
+        }
+        header p {
+            margin-top: 8px;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 300;
+        }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 48px 20px;
-    }
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px 36px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            z-index: 1;
+            animation: fadeUp 0.6s ease both;
+            transition: box-shadow var(--transition);
+        }
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+        }
+        .card+.card {
+            margin-top: 22px;
+            animation-delay: 0.15s;
+        }
 
-    body::before {
-      content: '';
-      position: fixed;
-      top: -120px; right: -120px;
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, rgba(42,92,69,0.12) 0%, transparent 70%);
-      pointer-events: none;
-    }
-    body::after {
-      content: '';
-      position: fixed;
-      bottom: -100px; left: -100px;
-      width: 350px; height: 350px;
-      background: radial-gradient(circle, rgba(184,134,11,0.08) 0%, transparent 70%);
-      pointer-events: none;
-    }
+        .card-title {
+            font-family: 'DM Serif Display', serif;
+            font-size: 1.15rem;
+            margin-bottom: 22px;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-title .dot {
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
 
-    header {
-      text-align: center;
-      margin-bottom: 40px;
-      animation: fadeDown 0.6s ease both;
-    }
-    header .eyebrow {
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 3px; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 10px;
-    }
-    header h1 {
-      font-family: 'DM Serif Display', serif;
-      font-size: clamp(2rem, 5vw, 3rem);
-      color: var(--text); line-height: 1.1;
-    }
-    header p { margin-top: 10px; color: var(--text-muted); font-size: 15px; font-weight: 300; }
+        /* ── Paste Zone ── */
+        .paste-zone {
+            background: var(--bg);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-sm);
+            padding: 18px 20px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all var(--transition);
+            position: relative;
+        }
+        .paste-zone:hover,
+        .paste-zone:focus-within {
+            border-color: var(--accent);
+            background: #f8faf7;
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+        .paste-zone.pasted {
+            border-color: var(--green);
+            background: var(--green-light);
+            animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .paste-zone .paste-icon {
+            font-size: 28px;
+            margin-bottom: 6px;
+        }
+        .paste-zone input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            padding: 4px;
+        }
+        .paste-zone input::placeholder {
+            color: #b0ada6;
+            font-style: italic;
+        }
+        .paste-zone .paste-hint {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .paste-feedback {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--green);
+            margin-top: 6px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .paste-feedback.show {
+            opacity: 1;
+        }
 
-    .card {
-      background: var(--surface);
-      border-radius: 20px; padding: 36px;
-      box-shadow: var(--shadow);
-      width: 100%; max-width: 560px;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.1s;
-    }
-    .card + .card { margin-top: 24px; animation-delay: 0.2s; }
+        /* ── Inputs Row ── */
+        .inputs-row {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 10px;
+            margin-bottom: 18px;
+            align-items: end;
+        }
+        .swap-btn {
+            background: var(--bg);
+            border: 1.5px solid var(--border);
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            font-size: 18px;
+            cursor: pointer;
+            color: var(--text-muted);
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 4px;
+            flex-shrink: 0;
+        }
+        .swap-btn:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: var(--accent);
+            transform: rotate(180deg);
+        }
+        label {
+            display: block;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        input[type='date'] {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            color: var(--text);
+            background: var(--bg);
+            transition: border-color var(--transition), box-shadow var(--transition);
+            outline: none;
+        }
+        input[type='date']:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        input[type='date'].error-input {
+            border-color: var(--red);
+            box-shadow: 0 0 0 3px rgba(192, 57, 43, 0.15);
+        }
 
-    .card-title {
-      font-family: 'DM Serif Display', serif;
-      font-size: 1.2rem; margin-bottom: 24px;
-      color: var(--text); display: flex; align-items: center; gap: 10px;
-    }
-    .card-title .dot {
-      width: 10px; height: 10px;
-      background: var(--accent); border-radius: 50%; flex-shrink: 0;
-    }
+        /* ── Quick Buttons ── */
+        .quick-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        .quick-btn {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            padding: 7px 14px;
+            border-radius: 20px;
+            border: 1.5px solid var(--border);
+            background: var(--surface);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all var(--transition);
+            white-space: nowrap;
+        }
+        .quick-btn:hover {
+            background: var(--accent-light);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+        .quick-btn.active {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
 
-    .inputs-row {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 16px; margin-bottom: 24px;
-    }
+        /* ── Button ── */
+        button {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+            transition: background var(--transition), transform 0.1s, box-shadow var(--transition);
+        }
+        button:hover {
+            background: #1e4433;
+            box-shadow: 0 4px 16px rgba(42, 92, 69, 0.35);
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1.5px solid var(--border);
+            font-size: 12px;
+            padding: 8px 14px;
+            width: auto;
+            letter-spacing: 0.5px;
+        }
+        .btn-secondary:hover {
+            background: var(--bg);
+            box-shadow: none;
+            color: var(--text);
+        }
+        .btn-export {
+            width: auto;
+            font-size: 12px;
+            padding: 8px 16px;
+            background: var(--gold);
+            letter-spacing: 0.3px;
+        }
+        .btn-export:hover {
+            background: #9a6f0a;
+        }
 
-    label {
-      display: block; font-size: 11px; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: 8px;
-    }
+        /* ── Results ── */
+        #resultado {
+            margin-top: 26px;
+            display: none;
+        }
+        .result-total {
+            text-align: center;
+            background: var(--accent-light);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 18px;
+        }
+        .result-total .num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.8rem;
+            color: var(--accent);
+            line-height: 1;
+        }
+        .result-total .lbl {
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--accent);
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+        .result-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .result-box {
+            border-radius: 14px;
+            padding: 18px 16px;
+            text-align: center;
+        }
+        .result-box.habiles {
+            background: #EAF5EE;
+            border: 1.5px solid #A8D5B5;
+        }
+        .result-box.inhabiles {
+            background: #FDECEA;
+            border: 1.5px solid #F0B3AE;
+        }
+        .result-box .num {
+            font-family: 'DM Serif Display', serif;
+            font-size: 2.4rem;
+            line-height: 1;
+        }
+        .result-box.habiles .num {
+            color: #1E7A3E;
+        }
+        .result-box.inhabiles .num {
+            color: var(--red);
+        }
+        .result-box .lbl {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            margin-top: 6px;
+            opacity: 0.8;
+        }
+        .result-box.habiles .lbl {
+            color: #1E7A3E;
+        }
+        .result-box.inhabiles .lbl {
+            color: var(--red);
+        }
+        .result-box .sublbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
 
-    input[type="date"] {
-      width: 100%; padding: 12px 14px;
-      border: 1.5px solid var(--border); border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 15px;
-      color: var(--text); background: var(--bg);
-      transition: border-color 0.2s, box-shadow 0.2s; outline: none;
-    }
-    input[type="date"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(42,92,69,0.12);
-    }
+        /* ── Breakdown ── */
+        .breakdown {
+            margin-top: 14px;
+            border-radius: var(--radius-sm);
+            border: 1.5px solid var(--border);
+            overflow: hidden;
+            font-size: 13px;
+        }
+        .breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 14px;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+        .breakdown-row:last-child {
+            border-bottom: none;
+        }
+        .breakdown-row .br-label {
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .breakdown-row .br-val {
+            font-weight: 600;
+            color: var(--text);
+        }
+        .highlight-hab {
+            background: #F3FBF5;
+        }
+        .highlight-feri {
+            background: #FFFBF0;
+        }
+        .highlight-wknd {
+            background: #FEF9F9;
+        }
+        .highlight-custom {
+            background: #F5F0FF;
+        }
 
-    button {
-      width: 100%; padding: 14px;
-      background: var(--accent); color: #fff;
-      border: none; border-radius: 10px;
-      font-family: 'DM Sans', sans-serif; font-size: 15px;
-      font-weight: 600; cursor: pointer; letter-spacing: 0.5px;
-      transition: background 0.2s, transform 0.1s, box-shadow 0.2s;
-    }
-    button:hover { background: #1e4433; box-shadow: 0 4px 16px rgba(42,92,69,0.3); }
-    button:active { transform: scale(0.98); }
+        /* ── Holiday List ── */
+        .holiday-list {
+            margin-top: 18px;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1.5px solid #F0C97A;
+        }
+        .holiday-list-header {
+            background: #FEF3DC;
+            padding: 10px 16px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #8A6100;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .holiday-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-top: 1px solid #F0E4BE;
+            background: #FFFBF0;
+            font-size: 13px;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .holiday-item .h-name {
+            color: var(--text);
+            font-weight: 500;
+        }
+        .holiday-item .h-date {
+            color: var(--text-muted);
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .holiday-item .h-tag {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+        .h-tag.weekend {
+            background: #FDECEA;
+            color: var(--red);
+        }
+        .h-tag.weekday {
+            background: #FEF3DC;
+            color: #8A6100;
+        }
+        .h-tag.custom {
+            background: #EDE4FF;
+            color: #5B2D8E;
+        }
+        .no-holidays {
+            padding: 12px 16px;
+            background: #FFFBF0;
+            font-size: 13px;
+            color: var(--text-muted);
+            border-top: 1px solid #F0E4BE;
+        }
 
-    .btn-secondary {
-      background: transparent; color: var(--text-muted);
-      border: 1.5px solid var(--border); font-size: 12px;
-      padding: 8px 14px; width: auto; letter-spacing: 0.5px;
-      margin-top: 10px;
-    }
-    .btn-secondary:hover { background: var(--bg); box-shadow: none; color: var(--text); }
+        /* ── Error ── */
+        .error {
+            text-align: center;
+            color: var(--red);
+            font-size: 14px;
+            padding: 12px;
+            background: #FDECEA;
+            border-radius: var(--radius-sm);
+            margin-top: 10px;
+        }
 
-    /* Results */
-    #resultado { margin-top: 28px; display: none; }
+        /* ── Config Panel ── */
+        .config-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            user-select: none;
+        }
+        .config-toggle .arrow {
+            transition: transform 0.3s;
+            font-size: 14px;
+        }
+        .config-toggle.open .arrow {
+            transform: rotate(180deg);
+        }
+        .config-panel {
+            display: none;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .config-panel.show {
+            display: block;
+            animation: fadeUp 0.3s ease both;
+        }
+        .config-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f0ede6;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .config-row:last-child {
+            border-bottom: none;
+        }
+        .config-row label.config-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text);
+            letter-spacing: 0;
+            text-transform: none;
+            margin: 0;
+            flex: 1;
+            min-width: 140px;
+        }
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 26px;
+            flex-shrink: 0;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #ccc;
+            border-radius: 26px;
+            transition: var(--transition);
+        }
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background: #fff;
+            border-radius: 50%;
+            transition: var(--transition);
+        }
+        .toggle-switch input:checked+.toggle-slider {
+            background: var(--accent);
+        }
+        .toggle-switch input:checked+.toggle-slider::before {
+            transform: translateX(22px);
+        }
+        .config-row .custom-date-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .config-row input[type='date'] {
+            width: auto;
+            min-width: 140px;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+        .custom-date-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            width: 100%;
+        }
+        .custom-date-chip {
+            font-size: 11px;
+            background: #EDE4FF;
+            color: #5B2D8E;
+            padding: 4px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid #D4C4F0;
+        }
+        .custom-date-chip .remove-chip {
+            cursor: pointer;
+            font-weight: 700;
+            color: #8B5CF6;
+            font-size: 14px;
+            line-height: 1;
+        }
+        .custom-date-chip .remove-chip:hover {
+            color: var(--red);
+        }
 
-    .result-total {
-      text-align: center; background: var(--accent-light);
-      border-radius: 12px; padding: 18px; margin-bottom: 20px;
-    }
-    .result-total .num {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2.8rem; color: var(--accent); line-height: 1;
-    }
-    .result-total .lbl {
-      font-size: 12px; font-weight: 600; letter-spacing: 2px;
-      text-transform: uppercase; color: var(--accent); margin-top: 4px; opacity: 0.8;
-    }
+        /* ── Reference Table ── */
+        .ref-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        .ref-table thead tr {
+            background: var(--accent);
+            color: #fff;
+        }
+        .ref-table thead th {
+            padding: 12px 16px;
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+        .ref-table thead th:first-child {
+            text-align: left;
+            border-radius: 8px 0 0 0;
+        }
+        .ref-table thead th:last-child {
+            border-radius: 0 8px 0 0;
+        }
+        .ref-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+        .ref-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        .ref-table tbody tr:hover {
+            background: var(--bg);
+        }
+        .ref-table tbody td {
+            padding: 14px 16px;
+            text-align: center;
+        }
+        .ref-table tbody td:first-child {
+            text-align: left;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .season-icon {
+            font-size: 18px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-total {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+        .badge-hab {
+            background: #EAF5EE;
+            color: #1E7A3E;
+        }
+        .badge-inhab {
+            background: #FDECEA;
+            color: var(--red);
+        }
 
-    .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        /* ── History ── */
+        .history-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 32px 36px;
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            z-index: 1;
+            margin-top: 22px;
+            animation: fadeUp 0.6s ease both;
+            animation-delay: 0.25s;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .history-empty {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            padding: 16px 0;
+        }
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        .history-table thead tr {
+            background: var(--bg);
+        }
+        .history-table thead th {
+            padding: 8px 12px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: left;
+            border-bottom: 1.5px solid var(--border);
+        }
+        .history-table tbody tr {
+            border-bottom: 1px solid var(--border);
+            transition: background 0.12s;
+            cursor: pointer;
+        }
+        .history-table tbody tr:last-child {
+            border-bottom: none;
+        }
+        .history-table tbody tr:hover {
+            background: var(--accent-light);
+        }
+        .history-table tbody td {
+            padding: 10px 12px;
+            color: var(--text);
+        }
+        .history-table tbody td:first-child {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+        .ht-hab {
+            color: #1E7A3E;
+            font-weight: 600;
+        }
+        .ht-inhab {
+            color: var(--red);
+            font-weight: 600;
+        }
+        .ht-total {
+            font-weight: 600;
+        }
+        .ht-range {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
 
-    .result-box { border-radius: 12px; padding: 18px 16px; text-align: center; }
-    .result-box.habiles  { background: #EAF5EE; border: 1.5px solid #A8D5B5; }
-    .result-box.inhabiles { background: #FDECEA; border: 1.5px solid #F0B3AE; }
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1A1A1A;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 13px;
+            font-weight: 500;
+            z-index: 1000;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
 
-    .result-box .num {
-      font-family: 'DM Serif Display', serif;
-      font-size: 2.4rem; line-height: 1;
-    }
-    .result-box.habiles .num  { color: #1E7A3E; }
-    .result-box.inhabiles .num { color: var(--red); }
+        /* ── Animations ── */
+        @keyframes fadeDown {
+            from {
+                opacity: 0;
+                transform: translateY(-16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes pop {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            70% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .pop {
+            animation: pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
 
-    .result-box .lbl {
-      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
-      text-transform: uppercase; margin-top: 6px; opacity: 0.75;
-    }
-    .result-box.habiles .lbl  { color: #1E7A3E; }
-    .result-box.inhabiles .lbl { color: var(--red); }
+        footer {
+            margin-top: 36px;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-align: center;
+            z-index: 1;
+            animation: fadeUp 0.6s ease both;
+            animation-delay: 0.35s;
+        }
 
-    .result-box .sublbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
-
-    /* Breakdown strip */
-    .breakdown {
-      margin-top: 14px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      overflow: hidden;
-      font-size: 13px;
-    }
-    .breakdown-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 9px 14px;
-      background: var(--surface);
-      border-bottom: 1px solid var(--border);
-    }
-    .breakdown-row:last-child { border-bottom: none; }
-    .breakdown-row .br-label { color: var(--text-muted); }
-    .breakdown-row .br-val { font-weight: 600; color: var(--text); }
-    .breakdown-row.highlight-hab  { background: #F3FBF5; }
-    .breakdown-row.highlight-feri { background: #FFFBF0; }
-    .breakdown-row.highlight-wknd { background: #FEF9F9; }
-
-    /* Holiday list */
-    .holiday-list {
-      margin-top: 20px; border-radius: 12px;
-      overflow: hidden; border: 1.5px solid #F0C97A;
-    }
-    .holiday-list-header {
-      background: #FEF3DC; padding: 10px 16px;
-      font-size: 11px; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: #8A6100; display: flex; align-items: center; gap: 6px;
-    }
-    .holiday-item {
-      display: flex; align-items: center;
-      justify-content: space-between;
-      padding: 10px 16px; border-top: 1px solid #F0E4BE;
-      background: #FFFBF0; font-size: 13px; gap: 8px;
-    }
-    .holiday-item .h-name { color: var(--text); font-weight: 500; }
-    .holiday-item .h-date { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
-    .holiday-item .h-tag {
-      font-size: 10px; font-weight: 600; letter-spacing: 1px;
-      padding: 2px 7px; border-radius: 20px; white-space: nowrap;
-    }
-    .h-tag.weekend { background: #FDECEA; color: var(--red); }
-    .h-tag.weekday { background: #FEF3DC; color: #8A6100; }
-
-    .no-holidays {
-      padding: 12px 16px; background: #FFFBF0;
-      font-size: 13px; color: var(--text-muted);
-      border-top: 1px solid #F0E4BE;
-    }
-
-    .error {
-      text-align: center; color: var(--red); font-size: 14px;
-      padding: 12px; background: #FDECEA; border-radius: 10px;
-    }
-
-    /* Reference Table */
-    .ref-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-    .ref-table thead tr { background: var(--accent); color: #fff; }
-    .ref-table thead th {
-      padding: 12px 16px; font-weight: 600;
-      font-size: 11px; letter-spacing: 1.5px;
-      text-transform: uppercase; text-align: center;
-    }
-    .ref-table thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
-    .ref-table thead th:last-child  { border-radius: 0 8px 0 0; }
-    .ref-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
-    .ref-table tbody tr:last-child { border-bottom: none; }
-    .ref-table tbody tr:hover { background: var(--bg); }
-    .ref-table tbody td { padding: 14px 16px; text-align: center; }
-    .ref-table tbody td:first-child {
-      text-align: left; font-weight: 600;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .season-icon { font-size: 18px; }
-    .badge { display: inline-block; padding: 2px 8px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .badge-total { background: var(--accent-light); color: var(--accent); }
-    .badge-hab   { background: #EAF5EE; color: #1E7A3E; }
-    .badge-inhab { background: #FDECEA; color: var(--red); }
-
-    /* ── History ── */
-    .history-card {
-      background: var(--surface);
-      border-radius: 20px; padding: 36px;
-      box-shadow: var(--shadow);
-      width: 100%; max-width: 560px;
-      margin-top: 24px;
-      animation: fadeUp 0.6s ease both;
-      animation-delay: 0.3s;
-    }
-    .history-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 16px;
-    }
-    .history-empty {
-      font-size: 13px; color: var(--text-muted);
-      text-align: center; padding: 16px 0;
-    }
-    .history-table {
-      width: 100%; border-collapse: collapse; font-size: 13px;
-    }
-    .history-table thead tr { background: var(--bg); }
-    .history-table thead th {
-      padding: 8px 12px; font-size: 10px; font-weight: 600;
-      letter-spacing: 1.5px; text-transform: uppercase;
-      color: var(--text-muted); text-align: left;
-      border-bottom: 1.5px solid var(--border);
-    }
-    .history-table tbody tr {
-      border-bottom: 1px solid var(--border);
-      transition: background 0.12s; cursor: pointer;
-    }
-    .history-table tbody tr:last-child { border-bottom: none; }
-    .history-table tbody tr:hover { background: var(--accent-light); }
-    .history-table tbody td { padding: 10px 12px; color: var(--text); }
-    .history-table tbody td:first-child { color: var(--text-muted); font-size: 12px; }
-    .ht-hab   { color: #1E7A3E; font-weight: 600; }
-    .ht-inhab { color: var(--red); font-weight: 600; }
-    .ht-total { font-weight: 600; }
-    .ht-range { font-size: 11px; color: var(--text-muted); }
-
-    /* Animations */
-    @keyframes fadeDown {
-      from { opacity: 0; transform: translateY(-16px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes pop {
-      0%   { transform: scale(0.7); opacity: 0; }
-      70%  { transform: scale(1.05); }
-      100% { transform: scale(1); opacity: 1; }
-    }
-    .pop { animation: pop 0.4s cubic-bezier(.34,1.56,.64,1) both; }
-
-    footer {
-      margin-top: 40px; font-size: 12px;
-      color: var(--text-muted); text-align: center;
-      animation: fadeUp 0.6s ease both; animation-delay: 0.4s;
-    }
-
-    @media (max-width: 480px) {
-      .inputs-row { grid-template-columns: 1fr; }
-      .result-row { grid-template-columns: 1fr; }
-      .card { padding: 24px 20px; }
-    }
-  </style>
+        @media (max-width: 520px) {
+            .inputs-row {
+                grid-template-columns: 1fr;
+            }
+            .swap-btn {
+                margin: 0 auto;
+                transform: rotate(90deg);
+            }
+            .swap-btn:hover {
+                transform: rotate(270deg);
+            }
+            .result-row {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 24px 18px;
+            }
+            .history-card {
+                padding: 24px 18px;
+            }
+            .quick-btns {
+                justify-content: center;
+            }
+            .config-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <div class="eyebrow">Herramienta Interna</div>
-    <h1>Calculadora de<br/>Días Hábiles</h1>
-    <p>Selecciona un rango de fechas para calcular días Lunes a Viernes.</p>
-  </header>
+    <header>
+        <div class="eyebrow">Herramienta Interna · Nivel Pro</div>
+        <h1>Calculadora de<br />Días Hábiles</h1>
+        <p>Selecciona un rango, pega desde Excel o configura tus reglas.</p>
+    </header>
 
-  <!-- Calculator Card -->
-  <div class="card">
-    <div class="card-title"><span class="dot"></span>Rango de Fechas</div>
-    <div class="inputs-row">
-      <div>
-        <label for="fechaInicio">Fecha Inicio</label>
-        <input type="date" id="fechaInicio" />
-      </div>
-      <div>
-        <label for="fechaFin">Fecha Fin</label>
-        <input type="date" id="fechaFin" />
-      </div>
-    </div>
-    <button onclick="calcular()">Calcular Días</button>
-    <div id="resultado"><div id="resultado-content"></div></div>
-  </div>
+    <!-- Main Calculator Card -->
+    <div class="card" id="mainCard">
+        <div class="card-title"><span class="dot"></span>Calculadora</div>
 
-  <!-- Reference Table Card -->
-  <div class="card">
-    <div class="card-title"><span class="dot"></span>Referencia de Vacaciones</div>
-    <table class="ref-table">
-      <thead>
-        <tr>
-          <th>Temporada</th>
-          <th>Total Días</th>
-          <th>Hábiles</th>
-          <th>Inhábiles</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><span class="season-icon">☀️</span> Verano</td>
-          <td><span class="badge badge-total">28</span></td>
-          <td><span class="badge badge-hab">20</span></td>
-          <td><span class="badge badge-inhab">8</span></td>
-        </tr>
-        <tr>
-          <td><span class="season-icon">❄️</span> Invierno</td>
-          <td><span class="badge badge-total">7</span></td>
-          <td><span class="badge badge-hab">5</span></td>
-          <td><span class="badge badge-inhab">2</span></td>
-        </tr>
-      </tbody>
-    </table>
-    <p style="margin-top:14px; font-size:12px; color:var(--text-muted);">
-      Hábiles = Lunes a Viernes &nbsp;·&nbsp; Inhábiles = Sábados, Domingos y Feriados
-    </p>
-  </div>
-
-  <!-- History Card -->
-  <div class="history-card">
-    <div class="history-header">
-      <div class="card-title" style="margin-bottom:0"><span class="dot"></span>Historial de Búsquedas</div>
-      <button class="btn-secondary" onclick="clearHistory()">Limpiar</button>
-    </div>
-    <div id="history-content"><div class="history-empty">Aún no hay búsquedas registradas.</div></div>
-  </div>
-
-  <footer>Considera L–V como días hábiles. Feriados nacionales incluidos (2020–2035).</footer>
-
-  <script>
-  // ── UTIL: Parsear fecha tipo Excel (DD-MM-YYYY o DD/MM/YYYY) ───────────
-  function parseFechaTexto(txt) {
-    const match = txt.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);
-    if (!match) return null;
-
-    const [_, d, m, y] = match;
-    return `${y}-${m}-${d}`; // formato ISO para input date
-  }
-
-  // ── EVENTO: pegar desde Excel ──────────────────────────────────────────
-  document.addEventListener("paste", function(e) {
-    const texto = e.clipboardData.getData("text");
-
-    // Buscar todas las fechas en el texto pegado
-    const matches = texto.match(/\d{2}[-\/]\d{2}[-\/]\d{4}/g);
-    if (!matches) return;
-
-    e.preventDefault();
-
-    if (matches.length >= 1) {
-      const f1 = parseFechaTexto(matches[0]);
-      if (f1) document.getElementById('fechaInicio').value = f1;
-    }
-
-    if (matches.length >= 2) {
-      const f2 = parseFechaTexto(matches[1]);
-      if (f2) document.getElementById('fechaFin').value = f2;
-    }
-
-    // Auto calcular si hay ambas
-    const inicio = document.getElementById('fechaInicio').value;
-    const fin    = document.getElementById('fechaFin').value;
-    if (inicio && fin) calcular();
-  });
-
-  // ── Easter Sunday ────────────────────────────────────────────────────
-  function getEaster(y) {
-    const a = y%19, b = Math.floor(y/100), c = y%100;
-    const d = Math.floor(b/4), e = b%4, f = Math.floor((b+8)/25);
-    const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15)%30;
-    const i = Math.floor(c/4), k = c%4, l = (32+2*e+2*i-h-k)%7;
-    const m = Math.floor((a+11*h+22*l)/451);
-    const month = Math.floor((h+l-7*m+114)/31);
-    const day   = ((h+l-7*m+114)%31)+1;
-    return new Date(y, month-1, day);
-  }
-
-  function nearestMonday(y, month, day) {
-    const d = new Date(y, month-1, day);
-    const deltas = [1,0,-1,-2,-3,3,2];
-    d.setDate(d.getDate() + deltas[d.getDay()]);
-    return d;
-  }
-
-  function getChileanHolidays(y) {
-    const holidays = [];
-    const add = (date, name) => holidays.push({ key: fmtKey(date), name });
-
-    [[1,1,'Año Nuevo'],[5,1,'Día del Trabajo'],[5,21,'Glorias Navales'],
-     [7,16,'Virgen del Carmen'],[8,15,'Asunción de la Virgen'],
-     [9,18,'Independencia Nacional'],[9,19,'Glorias del Ejército'],
-     [10,31,'Iglesias Evangélicas y Protestantes'],
-     [11,1,'Día de Todos los Santos'],[12,8,'Inmaculada Concepción'],
-     [12,25,'Navidad']
-    ].forEach(([m,d,n]) => add(new Date(y, m-1, d), n));
-
-    const easter = getEaster(y);
-    const vs = new Date(easter); vs.setDate(easter.getDate()-2);
-    const ss = new Date(easter); ss.setDate(easter.getDate()-1);
-    add(vs, 'Viernes Santo');
-    add(ss, 'Sábado Santo');
-
-    add(nearestMonday(y,6,21), 'Día de los Pueblos Indígenas');
-    add(nearestMonday(y,6,29), 'San Pedro y San Pablo');
-    add(nearestMonday(y,10,12), 'Encuentro de Dos Mundos');
-
-    if (new Date(y,0,1).getDay()===6)
-      add(new Date(y,0,2), 'Feriado por Año Nuevo (traslado)');
-
-    const seen = new Set();
-    return holidays.filter(h => {
-      if(seen.has(h.key)) return false;
-      seen.add(h.key);
-      return true;
-    });
-  }
-
-  function fmtKey(d) {
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
-  function buildHolidayMap(y1, y2) {
-    const map = {};
-    for (let y=y1; y<=y2; y++)
-      getChileanHolidays(y).forEach(h => map[h.key]=h.name);
-    return map;
-  }
-
-  // ── Init dates ───────────────────────────────────────────────────────
-  const todayD = new Date();
-  const laterD = new Date(); laterD.setDate(todayD.getDate()+7);
-  const fmtISO = d => d.toISOString().split('T')[0];
-
-  document.getElementById('fechaInicio').value = fmtISO(todayD);
-  document.getElementById('fechaFin').value    = fmtISO(laterD);
-
-  ['fechaInicio','fechaFin'].forEach(id => {
-    document.getElementById(id).addEventListener('keydown', e => {
-      if (e.key === 'Enter') calcular();
-    });
-  });
-
-  // ── CALCULAR (igual que el tuyo, sin cambios) ─────────────────────────
-  function calcular() {
-    const inicio = document.getElementById('fechaInicio').value;
-    const fin    = document.getElementById('fechaFin').value;
-    const res    = document.getElementById('resultado');
-    const cont   = document.getElementById('resultado-content');
-
-    res.style.display = 'block';
-
-    if (!inicio || !fin) {
-      cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>';
-      return;
-    }
-
-    const d1 = new Date(inicio+'T00:00:00');
-    const d2 = new Date(fin+'T00:00:00');
-
-    if (d2 < d1) {
-      cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior.</div>';
-      return;
-    }
-
-    const holidayMap = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
-
-    let habilesPuros = 0, feriadosWeekday = 0, finDeSemana = 0;
-
-    let cursor = new Date(d1);
-    while (cursor <= d2) {
-      const dow = cursor.getDay();
-      const key = fmtKey(cursor);
-      const isWeekend = (dow===0 || dow===6);
-      const isFeriado = !!holidayMap[key];
-
-      if (isWeekend) finDeSemana++;
-      else if (isFeriado) feriadosWeekday++;
-      else habilesPuros++;
-
-      cursor.setDate(cursor.getDate()+1);
-    }
-
-    const totalHabiles = habilesPuros;
-    const totalInhabiles = finDeSemana + feriadosWeekday;
-    const total = totalHabiles + totalInhabiles;
-
-    cont.innerHTML = `
-      <div class="result-total">
-        <div class="num">${total}</div>
-        <div class="lbl">Días Totales</div>
-      </div>
-      <div class="result-row">
-        <div class="result-box habiles">
-          <div class="num">${totalHabiles}</div>
-          <div class="lbl">Hábiles</div>
+        <!-- Paste Zone -->
+        <div class="paste-zone" id="pasteZone" tabindex="0">
+            <div class="paste-icon">📋</div>
+            <input type="text" id="pasteInput" placeholder="Pega aquí tu rango desde Excel…" aria-label="Pegar rango de fechas" />
+            <div class="paste-hint">Ejemplo: <strong>16-07-2024 21-07-2024</strong> &nbsp;·&nbsp; También: 16/07/2024 - 21/07/2024</div>
+            <div class="paste-feedback" id="pasteFeedback">✅ ¡Fechas detectadas y cargadas!</div>
         </div>
-        <div class="result-box inhabiles">
-          <div class="num">${totalInhabiles}</div>
-          <div class="lbl">Inhábiles</div>
+
+        <!-- Date Inputs -->
+        <div class="inputs-row">
+            <div>
+                <label for="fechaInicio">Fecha Inicio</label>
+                <input type="date" id="fechaInicio" />
+            </div>
+            <button class="swap-btn" id="swapBtn" title="Intercambiar fechas" aria-label="Intercambiar fechas">⇄</button>
+            <div>
+                <label for="fechaFin">Fecha Fin</label>
+                <input type="date" id="fechaFin" />
+            </div>
         </div>
-      </div>`;
-  }
 
-  calcular();
-</script>
+        <!-- Quick Select Buttons -->
+        <div class="quick-btns" id="quickBtns">
+            <button class="quick-btn" data-range="today">Hoy</button>
+            <button class="quick-btn" data-range="this-week">Esta semana</button>
+            <button class="quick-btn" data-range="next-week">Próxima semana</button>
+            <button class="quick-btn" data-range="this-month">Este mes</button>
+            <button class="quick-btn" data-range="last-month">Mes pasado</button>
+            <button class="quick-btn" data-range="this-year">Este año</button>
+        </div>
 
+        <button onclick="calcular()">🔍 Calcular Días</button>
+        <div id="resultado"><div id="resultado-content"></div></div>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+            <button class="btn-secondary btn-export" onclick="exportarCSV()" title="Exportar a CSV">📥 Exportar CSV</button>
+            <button class="btn-secondary btn-export" onclick="copiarResultado()" title="Copiar al portapapeles">📋 Copiar</button>
+        </div>
+    </div>
+
+    <!-- Config Card -->
+    <div class="card" id="configCard">
+        <div class="config-toggle" id="configToggle">
+            <div class="card-title" style="margin-bottom:0"><span class="dot"></span>⚙️ Configuración Avanzada</div>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="config-panel" id="configPanel">
+            <div class="config-row">
+                <label class="config-label">Incluir sábados como hábiles</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cfgSabadosHabiles" onchange="guardarConfig(); calcular();" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="config-row">
+                <label class="config-label">Incluir domingos como hábiles</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cfgDomingosHabiles" onchange="guardarConfig(); calcular();" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="config-row">
+                <label class="config-label">Considerar feriados nacionales (Chile)</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="cfgFeriadosActivos" checked onchange="guardarConfig(); calcular();" />
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+            <div class="config-row">
+                <label class="config-label" style="width:100%;">Días inhábiles personalizados</label>
+                <div class="custom-date-group">
+                    <input type="date" id="customDateInput" />
+                    <button class="btn-secondary" onclick="agregarFechaPersonalizada()" style="padding:8px 14px;">+ Agregar</button>
+                </div>
+                <div class="custom-date-chips" id="customDateChips"></div>
+                <button class="btn-secondary" onclick="limpiarFechasPersonalizadas()" style="margin-top:6px;font-size:11px;">🗑 Limpiar todas</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reference Table Card -->
+    <div class="card">
+        <div class="card-title"><span class="dot"></span>Referencia de Vacaciones</div>
+        <table class="ref-table">
+            <thead>
+                <tr>
+                    <th>Temporada</th>
+                    <th>Total Días</th>
+                    <th>Hábiles</th>
+                    <th>Inhábiles</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="season-icon">☀️</span> Verano</td>
+                    <td><span class="badge badge-total">28</span></td>
+                    <td><span class="badge badge-hab">20</span></td>
+                    <td><span class="badge badge-inhab">8</span></td>
+                </tr>
+                <tr>
+                    <td><span class="season-icon">❄️</span> Invierno</td>
+                    <td><span class="badge badge-total">7</span></td>
+                    <td><span class="badge badge-hab">5</span></td>
+                    <td><span class="badge badge-inhab">2</span></td>
+                </tr>
+            </tbody>
+        </table>
+        <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">
+            Hábiles = Lunes a Viernes &nbsp;·&nbsp; Inhábiles = Sábados, Domingos y Feriados
+        </p>
+    </div>
+
+    <!-- History Card -->
+    <div class="history-card">
+        <div class="history-header">
+            <div class="card-title" style="margin-bottom:0"><span class="dot"></span>Historial de Búsquedas</div>
+            <button class="btn-secondary" onclick="clearHistory()">🗑 Limpiar</button>
+        </div>
+        <div id="history-content"><div class="history-empty">Aún no hay búsquedas registradas.</div></div>
+    </div>
+
+    <footer>Considera reglas configurables · Feriados nacionales Chile (2020–2035) · Zona horaria neutra</footer>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ──────────────────────────────────────────────────────────────────
+        //  Easter Sunday (Algoritmo de Butcher)
+        // ──────────────────────────────────────────────────────────────────
+        function getEaster(y) {
+            const a = y % 19,
+                b = Math.floor(y / 100),
+                c = y % 100;
+            const d = Math.floor(b / 4),
+                e = b % 4,
+                f = Math.floor((b + 8) / 25);
+            const g = Math.floor((b - f + 1) / 3),
+                h = (19 * a + b - d - g + 15) % 30;
+            const i = Math.floor(c / 4),
+                k = c % 4,
+                l = (32 + 2 * e + 2 * i - h - k) % 7;
+            const m = Math.floor((a + 11 * h + 22 * l) / 451);
+            const month = Math.floor((h + l - 7 * m + 114) / 31);
+            const day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new Date(y, month - 1, day);
+        }
+
+        function nearestMonday(y, month, day) {
+            const d = new Date(y, month - 1, day);
+            const deltas = [1, 0, -1, -2, -3, 3, 2];
+            d.setDate(d.getDate() + deltas[d.getDay()]);
+            return d;
+        }
+
+        function fmtKey(d) {
+            return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        }
+
+        function getChileanHolidays(y) {
+            const holidays = [];
+            const add = (date, name) => holidays.push({ key: fmtKey(date), name });
+
+            [
+                [1, 1, 'Año Nuevo'],
+                [5, 1, 'Día del Trabajo'],
+                [5, 21, 'Glorias Navales'],
+                [7, 16, 'Virgen del Carmen'],
+                [8, 15, 'Asunción de la Virgen'],
+                [9, 18, 'Independencia Nacional'],
+                [9, 19, 'Glorias del Ejército'],
+                [10, 31, 'Iglesias Evangélicas y Protestantes'],
+                [11, 1, 'Día de Todos los Santos'],
+                [12, 8, 'Inmaculada Concepción'],
+                [12, 25, 'Navidad']
+            ].forEach(([m, d, n]) => add(new Date(y, m - 1, d), n));
+
+            const easter = getEaster(y);
+            const vs = new Date(easter);
+            vs.setDate(easter.getDate() - 2);
+            const ss = new Date(easter);
+            ss.setDate(easter.getDate() - 1);
+            add(vs, 'Viernes Santo');
+            add(ss, 'Sábado Santo');
+
+            add(nearestMonday(y, 6, 21), 'Día de los Pueblos Indígenas');
+            add(nearestMonday(y, 6, 29), 'San Pedro y San Pablo');
+            add(nearestMonday(y, 10, 12), 'Encuentro de Dos Mundos');
+
+            if (new Date(y, 0, 1).getDay() === 6) add(new Date(y, 0, 2), 'Feriado por Año Nuevo (traslado)');
+
+            const seen = new Set();
+            return holidays.filter(h => { if (seen.has(h.key)) return false;
+                seen.add(h.key); return true; });
+        }
+
+        function buildHolidayMap(y1, y2) {
+            const map = {};
+            for (let y = y1; y <= y2; y++) getChileanHolidays(y).forEach(h => { map[h.key] = h.name; });
+            return map;
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Config storage
+        // ──────────────────────────────────────────────────────────────────
+        const CONFIG_KEY = 'diasHabilesConfig';
+
+        function loadConfig() {
+            try {
+                return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {};
+            } catch { return {}; }
+        }
+
+        function saveConfigToStorage(cfg) {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg));
+        }
+
+        function guardarConfig() {
+            const cfg = {
+                sabadosHabiles: document.getElementById('cfgSabadosHabiles').checked,
+                domingosHabiles: document.getElementById('cfgDomingosHabiles').checked,
+                feriadosActivos: document.getElementById('cfgFeriadosActivos').checked,
+                fechasPersonalizadas: getFechasPersonalizadas(),
+            };
+            saveConfigToStorage(cfg);
+        }
+
+        function getFechasPersonalizadas() {
+            const chips = document.querySelectorAll('.custom-date-chip');
+            const fechas = [];
+            chips.forEach(chip => {
+                const iso = chip.getAttribute('data-iso');
+                const nombre = chip.getAttribute('data-nombre') || 'Fecha personalizada';
+                if (iso) fechas.push({ iso, nombre });
+            });
+            return fechas;
+        }
+
+        function aplicarConfig() {
+            const cfg = loadConfig();
+            document.getElementById('cfgSabadosHabiles').checked = !!cfg.sabadosHabiles;
+            document.getElementById('cfgDomingosHabiles').checked = !!cfg.domingosHabiles;
+            document.getElementById('cfgFeriadosActivos').checked = cfg.feriadosActivos !== false; // default true
+            if (cfg.fechasPersonalizadas && Array.isArray(cfg.fechasPersonalizadas)) {
+                cfg.fechasPersonalizadas.forEach(f => agregarChipFecha(f.iso, f.nombre));
+            }
+        }
+
+        function agregarFechaPersonalizada() {
+            const input = document.getElementById('customDateInput');
+            const val = input.value;
+            if (!val) return;
+            const nombre = 'Fecha inhábil personalizada';
+            agregarChipFecha(val, nombre);
+            input.value = '';
+            guardarConfig();
+            calcular();
+            showToast('Fecha personalizada agregada ✅');
+        }
+
+        function agregarChipFecha(iso, nombre) {
+            // Evitar duplicados
+            const existentes = document.querySelectorAll('.custom-date-chip');
+            for (const chip of existentes) {
+                if (chip.getAttribute('data-iso') === iso) return;
+            }
+            const chipsContainer = document.getElementById('customDateChips');
+            const d = new Date(iso + 'T00:00:00');
+            const display = d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric',
+                timeZone: 'UTC' });
+            const chip = document.createElement('span');
+            chip.className = 'custom-date-chip';
+            chip.setAttribute('data-iso', iso);
+            chip.setAttribute('data-nombre', nombre);
+            chip.innerHTML =
+                `📌 ${display} <span class="remove-chip" onclick="eliminarChip(this, '${iso}')" title="Eliminar">×</span>`;
+            chipsContainer.appendChild(chip);
+        }
+
+        function eliminarChip(el, iso) {
+            el.closest('.custom-date-chip').remove();
+            guardarConfig();
+            calcular();
+            showToast('Fecha personalizada eliminada');
+        }
+
+        function limpiarFechasPersonalizadas() {
+            document.getElementById('customDateChips').innerHTML = '';
+            guardarConfig();
+            calcular();
+            showToast('Fechas personalizadas limpiadas');
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Toast
+        // ──────────────────────────────────────────────────────────────────
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Flexible Date Parser
+        // ──────────────────────────────────────────────────────────────────
+        function parseFlexibleDate(str) {
+            str = str.trim();
+            if (!str) return null;
+            // ISO: yyyy-mm-dd
+            let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+            if (m) {
+                return new Date(+m[1], +m[2] - 1, +m[3]);
+            }
+            // dd-mm-yyyy, dd/mm/yyyy, dd.mm.yyyy
+            m = str.match(/^(\d{1,2})[-\/\.](\d{1,2})[-\/\.](\d{4})$/);
+            if (m) {
+                let d = +m[1],
+                    mo = +m[2],
+                    y = +m[3];
+                if (d > 12 && mo <= 12) return new Date(y, mo - 1, d);
+                if (mo > 12 && d <= 12) return new Date(y, d - 1, mo);
+                return new Date(y, mo - 1, d);
+            }
+            // yyyy/mm/dd
+            m = str.match(/^(\d{4})[\/\.](\d{1,2})[\/\.](\d{1,2})$/);
+            if (m) {
+                return new Date(+m[1], +m[2] - 1, +m[3]);
+            }
+            return null;
+        }
+
+        function extractDatesFromText(text) {
+            // Busca patrones de fecha en el texto
+            const patterns = [
+                /\d{4}-\d{1,2}-\d{1,2}/g,
+                /\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{4}/g,
+            ];
+            let allMatches = [];
+            patterns.forEach(p => {
+                const found = text.match(p);
+                if (found) allMatches = allMatches.concat(found);
+            });
+            // Parsear y quedarse con los válidos
+            const dates = [];
+            allMatches.forEach(match => {
+                const d = parseFlexibleDate(match);
+                if (d && !isNaN(d.getTime())) dates.push(d);
+            });
+            // Eliminar duplicados por misma fecha
+            const unique = [];
+            const seen = new Set();
+            dates.forEach(d => {
+                const key = fmtKey(d);
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(d);
+                }
+            });
+            // Ordenar por fecha ascendente
+            unique.sort((a, b) => a - b);
+            return unique;
+        }
+
+        function handlePaste(text) {
+            const dates = extractDatesFromText(text);
+            if (dates.length >= 2) {
+                const d1 = dates[0];
+                const d2 = dates[dates.length - 1];
+                setFechas(d1, d2);
+                document.getElementById('pasteZone').classList.add('pasted');
+                const fb = document.getElementById('pasteFeedback');
+                fb.classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('pasteZone').classList.remove('pasted');
+                    fb.classList.remove('show');
+                }, 2000);
+                calcular();
+                return true;
+            } else if (dates.length === 1) {
+                // Solo una fecha: la ponemos como inicio, y fin = inicio + 7 días
+                const d1 = dates[0];
+                const d2 = new Date(d1);
+                d2.setDate(d2.getDate() + 7);
+                setFechas(d1, d2);
+                document.getElementById('pasteZone').classList.add('pasted');
+                const fb = document.getElementById('pasteFeedback');
+                fb.textContent = '✅ Fecha detectada (fin = inicio + 7 días)';
+                fb.classList.add('show');
+                setTimeout(() => {
+                    document.getElementById('pasteZone').classList.remove('pasted');
+                    fb.classList.remove('show');
+                    fb.textContent = '✅ ¡Fechas detectadas y cargadas!';
+                }, 2000);
+                calcular();
+                return true;
+            }
+            return false;
+        }
+
+        function setFechas(d1, d2) {
+            const fmtISO = d => d.toISOString().split('T')[0];
+            document.getElementById('fechaInicio').value = fmtISO(d1);
+            document.getElementById('fechaFin').value = fmtISO(d2);
+            document.getElementById('fechaInicio').classList.remove('error-input');
+            document.getElementById('fechaFin').classList.remove('error-input');
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Paste event listeners
+        // ──────────────────────────────────────────────────────────────────
+        document.getElementById('pasteInput').addEventListener('paste', function(e) {
+            e.preventDefault();
+            const text = (e.clipboardData || window.clipboardData).getData('text');
+            this.value = text;
+            if (handlePaste(text)) {
+                this.value = '';
+            }
+        });
+        document.getElementById('pasteInput').addEventListener('input', function() {
+            const text = this.value;
+            if (text.length > 8 && handlePaste(text)) {
+                this.value = '';
+            }
+        });
+        // Also allow paste on the whole paste zone
+        document.getElementById('pasteZone').addEventListener('click', function() {
+            document.getElementById('pasteInput').focus();
+        });
+        // Intercept paste on date inputs for flexible parsing
+        ['fechaInicio', 'fechaFin'].forEach(id => {
+            const el = document.getElementById(id);
+            el.addEventListener('paste', function(e) {
+                const text = (e.clipboardData || window.clipboardData).getData('text').trim();
+                const dates = extractDatesFromText(text);
+                if (dates.length >= 1) {
+                    e.preventDefault();
+                    const d = dates[0];
+                    this.value = d.toISOString().split('T')[0];
+                    this.classList.remove('error-input');
+                    if (dates.length >= 2 && id === 'fechaInicio') {
+                        document.getElementById('fechaFin').value = dates[dates.length - 1]
+                            .toISOString().split('T')[0];
+                        document.getElementById('fechaFin').classList.remove('error-input');
+                    }
+                }
+            });
+            el.addEventListener('change', function() {
+                this.classList.remove('error-input');
+            });
+        });
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Swap button
+        // ──────────────────────────────────────────────────────────────────
+        document.getElementById('swapBtn').addEventListener('click', function() {
+            const ini = document.getElementById('fechaInicio').value;
+            const fin = document.getElementById('fechaFin').value;
+            document.getElementById('fechaInicio').value = fin;
+            document.getElementById('fechaFin').value = ini;
+            document.getElementById('fechaInicio').classList.remove('error-input');
+            document.getElementById('fechaFin').classList.remove('error-input');
+            calcular();
+        });
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Quick buttons
+        // ──────────────────────────────────────────────────────────────────
+        function getMonday(d) {
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            return new Date(d.getFullYear(), d.getMonth(), diff);
+        }
+
+        document.getElementById('quickBtns').addEventListener('click', function(e) {
+            const btn = e.target.closest('.quick-btn');
+            if (!btn) return;
+            const range = btn.getAttribute('data-range');
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let ini, fin;
+            switch (range) {
+                case 'today':
+                    ini = new Date(today);
+                    fin = new Date(today);
+                    break;
+                case 'this-week':
+                    ini = getMonday(today);
+                    fin = new Date(ini);
+                    fin.setDate(fin.getDate() + 6);
+                    break;
+                case 'next-week':
+                    ini = getMonday(today);
+                    ini.setDate(ini.getDate() + 7);
+                    fin = new Date(ini);
+                    fin.setDate(fin.getDate() + 6);
+                    break;
+                case 'this-month':
+                    ini = new Date(today.getFullYear(), today.getMonth(), 1);
+                    fin = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                case 'last-month':
+                    ini = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    fin = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                case 'this-year':
+                    ini = new Date(today.getFullYear(), 0, 1);
+                    fin = new Date(today.getFullYear(), 11, 31);
+                    break;
+            }
+            if (ini && fin) {
+                setFechas(ini, fin);
+                calcular();
+                // Highlight active
+                document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                setTimeout(() => btn.classList.remove('active'), 1500);
+            }
+        });
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Config panel toggle
+        // ──────────────────────────────────────────────────────────────────
+        document.getElementById('configToggle').addEventListener('click', function() {
+            this.classList.toggle('open');
+            document.getElementById('configPanel').classList.toggle('show');
+        });
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Init dates
+        // ──────────────────────────────────────────────────────────────────
+        const todayD = new Date();
+        todayD.setHours(0, 0, 0, 0);
+        const laterD = new Date(todayD);
+        laterD.setDate(laterD.getDate() + 7);
+        const fmtISO = d => d.toISOString().split('T')[0];
+
+        function initDates() {
+            // Intentar restaurar última búsqueda
+            const last = loadLastSearch();
+            if (last && last.inicioISO && last.finISO) {
+                document.getElementById('fechaInicio').value = last.inicioISO;
+                document.getElementById('fechaFin').value = last.finISO;
+            } else {
+                document.getElementById('fechaInicio').value = fmtISO(todayD);
+                document.getElementById('fechaFin').value = fmtISO(laterD);
+            }
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Main calculator
+        // ──────────────────────────────────────────────────────────────────
+        function calcular() {
+            const inicio = document.getElementById('fechaInicio').value;
+            const fin = document.getElementById('fechaFin').value;
+            const res = document.getElementById('resultado');
+            const cont = document.getElementById('resultado-content');
+            const iniInput = document.getElementById('fechaInicio');
+            const finInput = document.getElementById('fechaFin');
+
+            res.style.display = 'block';
+            iniInput.classList.remove('error-input');
+            finInput.classList.remove('error-input');
+
+            if (!inicio || !fin) {
+                cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>';
+                if (!inicio) iniInput.classList.add('error-input');
+                if (!fin) finInput.classList.add('error-input');
+                return;
+            }
+
+            const d1 = new Date(inicio + 'T00:00:00');
+            const d2 = new Date(fin + 'T00:00:00');
+
+            if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+                cont.innerHTML = '<div class="error">Una o ambas fechas no son válidas.</div>';
+                if (isNaN(d1.getTime())) iniInput.classList.add('error-input');
+                if (isNaN(d2.getTime())) finInput.classList.add('error-input');
+                return;
+            }
+
+            if (d2 < d1) {
+                cont.innerHTML =
+                    '<div class="error">La fecha de fin debe ser igual o posterior a la fecha de inicio.</div>';
+                finInput.classList.add('error-input');
+                return;
+            }
+
+            // Load config
+            const cfg = loadConfig();
+            const sabadosHabiles = !!cfg.sabadosHabiles;
+            const domingosHabiles = !!cfg.domingosHabiles;
+            const feriadosActivos = cfg.feriadosActivos !== false;
+            const fechasPersonalizadas = cfg.fechasPersonalizadas || [];
+
+            // Build custom dates set
+            const customSet = new Set();
+            const customMap = {}; // key -> nombre
+            fechasPersonalizadas.forEach(f => {
+                customSet.add(f.iso);
+                customMap[f.iso] = f.nombre;
+            });
+
+            const holidayMap = feriadosActivos ? buildHolidayMap(d1.getFullYear(), d2.getFullYear()) : {};
+
+            let habilesPuros = 0; // weekday, no holiday, no custom
+            let feriadosWeekday = 0; // weekday AND (holiday or custom)
+            let finDeSemana = 0; // weekend (unless configured as habiles)
+            const feriadosEnRango = [];
+            const customEnRango = [];
+
+            let cursor = new Date(d1);
+            while (cursor <= d2) {
+                const dow = cursor.getDay();
+                const key = fmtKey(cursor);
+                const isWeekend = (dow === 0 || dow === 6);
+                const isFeriado = !!holidayMap[key];
+                const isCustom = customSet.has(key);
+                const isInhabilCustom = isCustom || (feriadosActivos && isFeriado);
+
+                // Determine if this day should be counted as weekend/non-working
+                let effectiveWeekend = isWeekend;
+                if (sabadosHabiles && dow === 6) effectiveWeekend = false;
+                if (domingosHabiles && dow === 0) effectiveWeekend = false;
+
+                if (effectiveWeekend) {
+                    finDeSemana++;
+                    if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: true });
+                    if (isCustom) customEnRango.push({ key, name: customMap[key], onWeekend: true });
+                } else {
+                    if (isInhabilCustom) {
+                        feriadosWeekday++;
+                        if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: false });
+                        if (isCustom) customEnRango.push({ key, name: customMap[key], onWeekend: false });
+                    } else {
+                        habilesPuros++;
+                    }
+                }
+                cursor.setDate(cursor.getDate() + 1);
+            }
+
+            const totalHabiles = habilesPuros;
+            const totalInhabiles = finDeSemana + feriadosWeekday;
+            const total = totalHabiles + totalInhabiles;
+
+            const pctHab = total > 0 ? Math.round((totalHabiles / total) * 100) : 0;
+            const pctInhab = total > 0 ? Math.round((totalInhabiles / total) * 100) : 0;
+
+            const opts = { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' };
+            const fmtD1 = d1.toLocaleDateString('es-CL', opts);
+            const fmtD2 = d2.toLocaleDateString('es-CL', opts);
+
+            const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+            const monthNames = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+
+            // Breakdown
+            const breakdownRows = [
+                { cls: 'highlight-hab', label: '📅 Días hábiles (según reglas)', val: habilesPuros,
+                    color: '#1E7A3E' },
+                { cls: 'highlight-wknd', label: '📆 Fines de semana no hábiles', val: finDeSemana, color: 'var(--red)' },
+                { cls: 'highlight-feri', label: '🎌 Feriados que restan hábiles', val: feriadosWeekday,
+                color: '#8A6100' },
+            ];
+            if (customEnRango.filter(f => !f.onWeekend).length > 0) {
+                breakdownRows.push({
+                    cls: 'highlight-custom',
+                    label: '📌 Fechas personalizadas (inhábiles)',
+                    val: customEnRango.filter(f => !f.onWeekend).length,
+                    color: '#5B2D8E'
+                });
+            }
+
+            const breakdownHTML = `
+            <div class="breakdown pop" style="animation-delay:0.2s">
+              ${breakdownRows.map(r => `
+              <div class="breakdown-row ${r.cls}">
+                <span class="br-label">${r.label}</span>
+                <span class="br-val" style="color:${r.color}">${r.val}</span>
+              </div>`).join('')}
+            </div>`;
+
+            // Holiday list
+            const weekdayFeriados = feriadosEnRango.filter(f => !f.onWeekend);
+            const weekendFeriados = feriadosEnRango.filter(f => f.onWeekend);
+            const weekdayCustom = customEnRango.filter(f => !f.onWeekend);
+            const weekendCustom = customEnRango.filter(f => f.onWeekend);
+
+            let feriadoRows = '';
+            const allInhabiles = [...weekdayFeriados, ...weekdayCustom, ...weekendFeriados, ...weekendCustom];
+            if (allInhabiles.length === 0) {
+                feriadoRows = `<div class="no-holidays">Sin feriados ni días inhábiles en este período.</div>`;
+            } else {
+                if (weekdayFeriados.length > 0) {
+                    feriadoRows += weekdayFeriados.map(f => {
+                        const d = new Date(f.key + 'T00:00:00');
+                        const lbl =
+                            `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+                        return `<div class="holiday-item">
+                  <span class="h-name">🎌 ${f.name}</span>
+                  <span class="h-date">${lbl}</span>
+                  <span class="h-tag weekday">Resta hábil</span>
+                </div>`;
+                    }).join('');
+                }
+                if (weekdayCustom.length > 0) {
+                    feriadoRows += weekdayCustom.map(f => {
+                        const d = new Date(f.key + 'T00:00:00');
+                        const lbl =
+                            `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+                        return `<div class="holiday-item">
+                  <span class="h-name">📌 ${f.name}</span>
+                  <span class="h-date">${lbl}</span>
+                  <span class="h-tag custom">Personalizada</span>
+                </div>`;
+                    }).join('');
+                }
+                if (weekendFeriados.length > 0) {
+                    feriadoRows += weekendFeriados.map(f => {
+                        const d = new Date(f.key + 'T00:00:00');
+                        const lbl =
+                            `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+                        return `<div class="holiday-item">
+                  <span class="h-name">📆 ${f.name}</span>
+                  <span class="h-date">${lbl}</span>
+                  <span class="h-tag weekend">Fin de semana</span>
+                </div>`;
+                    }).join('');
+                }
+                if (weekendCustom.length > 0) {
+                    feriadoRows += weekendCustom.map(f => {
+                        const d = new Date(f.key + 'T00:00:00');
+                        const lbl =
+                            `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+                        return `<div class="holiday-item">
+                  <span class="h-name">📆 ${f.name}</span>
+                  <span class="h-date">${lbl}</span>
+                  <span class="h-tag custom">Fin de semana</span>
+                </div>`;
+                    }).join('');
+                }
+            }
+
+            cont.innerHTML = `
+            <div class="result-total pop">
+              <div class="num">${total}</div>
+              <div class="lbl">Días Totales</div>
+              <div style="font-size:12px;color:var(--accent);opacity:0.7;margin-top:4px">${fmtD1} — ${fmtD2}</div>
+            </div>
+            <div class="result-row">
+              <div class="result-box habiles pop" style="animation-delay:0.08s">
+                <div class="num">${totalHabiles}</div>
+                <div class="lbl">Hábiles</div>
+                <div class="sublbl">${pctHab}% del total</div>
+              </div>
+              <div class="result-box inhabiles pop" style="animation-delay:0.16s">
+                <div class="num">${totalInhabiles}</div>
+                <div class="lbl">Inhábiles</div>
+                <div class="sublbl">${pctInhab}% del total</div>
+              </div>
+            </div>
+            ${breakdownHTML}
+            <div class="holiday-list pop" style="animation-delay:0.28s">
+              <div class="holiday-list-header">🎌 Días inhábiles en el período</div>
+              ${feriadoRows}
+            </div>`;
+
+            // Save last search
+            saveLastSearch({
+                inicioISO: inicio,
+                finISO: fin,
+                total,
+                habiles: totalHabiles,
+                inhabiles: totalInhabiles,
+                feriados: feriadosWeekday,
+                inicio: fmtD1,
+                fin: fmtD2,
+            });
+
+            // Save to history
+            saveHistory({
+                time: new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('es-CL', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+                inicio: fmtD1,
+                fin: fmtD2,
+                inicioISO: inicio,
+                finISO: fin,
+                total,
+                habiles: totalHabiles,
+                inhabiles: totalInhabiles,
+                feriados: feriadosWeekday,
+            });
+
+            // Scroll to result
+            res.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Last Search persistence
+        // ──────────────────────────────────────────────────────────────────
+        const LAST_SEARCH_KEY = 'diasHabilesLastSearch';
+
+        function saveLastSearch(data) {
+            localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify(data));
+        }
+
+        function loadLastSearch() {
+            try {
+                return JSON.parse(localStorage.getItem(LAST_SEARCH_KEY)) || null;
+            } catch { return null; }
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  History
+        // ──────────────────────────────────────────────────────────────────
+        const HISTORY_KEY = 'diasHabilesHistory';
+
+        function loadHistory() {
+            try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; }
+        }
+
+        function saveHistory(entry) {
+            const hist = loadHistory();
+            hist.unshift(entry);
+            if (hist.length > 25) hist.pop();
+            localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+            renderHistory();
+        }
+
+        function clearHistory() {
+            localStorage.removeItem(HISTORY_KEY);
+            renderHistory();
+            showToast('Historial limpiado');
+        }
+
+        function renderHistory() {
+            const hist = loadHistory();
+            const el = document.getElementById('history-content');
+            if (hist.length === 0) {
+                el.innerHTML = '<div class="history-empty">Aún no hay búsquedas registradas.</div>';
+                return;
+            }
+            const rows = hist.map((h, i) => `
+            <tr onclick="restoreSearch(${i})" title="Click para cargar estas fechas">
+              <td>${h.date} ${h.time}</td>
+              <td class="ht-range">${h.inicio} → ${h.fin}</td>
+              <td class="ht-total">${h.total}</td>
+              <td class="ht-hab">${h.habiles}</td>
+              <td class="ht-inhab">${h.inhabiles}</td>
+            </tr>`).join('');
+            el.innerHTML = `
+            <table class="history-table">
+              <thead><tr><th>Hora</th><th>Período</th><th>Total</th><th>Hábiles</th><th>Inhábiles</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+            <p style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:right">
+              Haz clic en una fila para cargar esas fechas
+            </p>`;
+        }
+
+        function restoreSearch(index) {
+            const hist = loadHistory();
+            const entry = hist[index];
+            if (!entry || !entry.inicioISO) return;
+            document.getElementById('fechaInicio').value = entry.inicioISO;
+            document.getElementById('fechaFin').value = entry.finISO;
+            calcular();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Export & Copy
+        // ──────────────────────────────────────────────────────────────────
+        function exportarCSV() {
+            const last = loadLastSearch();
+            if (!last) {
+                showToast('Primero realiza un cálculo');
+                return;
+            }
+            const csvRows = [
+                'Métrica,Valor',
+                `Fecha inicio,${last.inicio}`,
+                `Fecha fin,${last.fin}`,
+                `Total días,${last.total}`,
+                `Días hábiles,${last.habiles}`,
+                `Días inhábiles,${last.inhabiles}`,
+                `Feriados en hábiles,${last.feriados}`,
+            ];
+            const csv = csvRows.join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'dias_habiles.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('CSV exportado ✅');
+        }
+
+        function copiarResultado() {
+            const last = loadLastSearch();
+            if (!last) {
+                showToast('Primero realiza un cálculo');
+                return;
+            }
+            const text = `📅 ${last.inicio} → ${last.fin}\n📊 Total: ${last.total} | Hábiles: ${last.habiles} | Inhábiles: ${last.inhabiles} | Feriados: ${last.feriados}`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Resultado copiado al portapapeles 📋');
+            }).catch(() => {
+                showToast('No se pudo copiar. Intenta de nuevo.');
+            });
+        }
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Enter key
+        // ──────────────────────────────────────────────────────────────────
+        ['fechaInicio', 'fechaFin', 'pasteInput'].forEach(id => {
+            document.getElementById(id).addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    if (id === 'pasteInput') {
+                        const text = document.getElementById('pasteInput').value;
+                        if (text.trim() && handlePaste(text)) {
+                            document.getElementById('pasteInput').value = '';
+                        }
+                    } else {
+                        calcular();
+                    }
+                }
+            });
+        });
+
+        // ──────────────────────────────────────────────────────────────────
+        //  Init
+        // ──────────────────────────────────────────────────────────────────
+        function init() {
+            aplicarConfig();
+            initDates();
+            renderHistory();
+            // Calcular automáticamente si hay fechas cargadas
+            const ini = document.getElementById('fechaInicio').value;
+            const fin = document.getElementById('fechaFin').value;
+            if (ini && fin) {
+                calcular();
+            }
+            // Si hay última búsqueda guardada, mostrar el resultado
+            const last = loadLastSearch();
+            if (last && last.inicioISO && last.finISO && ini && fin) {
+                // Ya se calculó arriba
+            }
+        }
+
+        init();
+
+        console.log('✅ Calculadora de Días Hábiles Pro inicializada.');
+        console.log('📋 Funcionalidades:');
+        console.log('  - Pegar rango desde Excel (ej: "16-07-2024 21-07-2024")');
+        console.log('  - Configuración avanzada (sábados/domingos hábiles, feriados, fechas personalizadas)');
+        console.log('  - Persistencia de última búsqueda y configuración');
+        console.log('  - Historial de búsquedas (click para restaurar)');
+        console.log('  - Exportación CSV y copia al portapapeles');
+        console.log('  - Sin bugs de timezone (T00:00:00)');
+        console.log('  - Botones rápidos: Hoy, Esta semana, Este mes, etc.');
+        console.log('  - Intercambio de fechas (botón ⇄)');
+        console.log('  - Detección flexible de formatos de fecha');
+    </script>
 </body>
 </html>
