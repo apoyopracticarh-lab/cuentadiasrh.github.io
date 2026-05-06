@@ -1,173 +1,1241 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<title>Calculadora Días Hábiles</title>
-<style>
-body { font-family: Arial; padding:20px; background:#f5f5f5 }
-.card { background:#fff; padding:20px; border-radius:10px; max-width:600px; margin:auto }
-input { padding:8px; margin:5px; }
-button { padding:10px; cursor:pointer }
-table { width:100%; border-collapse:collapse; margin-top:15px }
-th, td { border:1px solid #ccc; padding:8px; text-align:center }
-th { background:#2A5C45; color:#fff }
-.hab { color:green; font-weight:bold }
-.inhab { color:red; font-weight:bold }
-</style>
-</head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Días Hábiles · Pro</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #F5F2EC;
+      --surface: #FFFFFF;
+      --accent: #2A5C45;
+      --accent-light: #D6EAE1;
+      --accent-glow: rgba(42, 92, 69, 0.12);
+      --text: #1A1A1A;
+      --text-muted: #6B6B6B;
+      --border: #E0DDD6;
+      --gold: #B8860B;
+      --gold-light: #FEF3DC;
+      --red: #C0392B;
+      --red-light: #FDECEA;
+      --green: #1E7A3E;
+      --green-light: #EAF5EE;
+      --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      --shadow-lg: 0 12px 40px rgba(0, 0, 0, 0.12);
+      --radius: 20px;
+      --radius-sm: 10px;
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px 60px;
+      position: relative;
+    }
+    body::before, body::after {
+      content: '';
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+    }
+    body::before {
+      top: -140px; right: -140px;
+      width: 450px; height: 450px;
+      background: radial-gradient(circle, rgba(42,92,69,0.1) 0%, transparent 70%);
+    }
+    body::after {
+      bottom: -120px; left: -120px;
+      width: 400px; height: 400px;
+      background: radial-gradient(circle, rgba(184,134,11,0.07) 0%, transparent 70%);
+    }
 
+    header {
+      text-align: center; margin-bottom: 36px; z-index: 1;
+      animation: fadeDown 0.6s ease both;
+    }
+    header .eyebrow {
+      font-size: 11px; font-weight: 600; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+    }
+    header h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      color: var(--text); line-height: 1.15;
+    }
+    header p {
+      margin-top: 8px; color: var(--text-muted);
+      font-size: 15px; font-weight: 300;
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 32px 36px;
+      box-shadow: var(--shadow);
+      width: 100%; max-width: 650px;
+      z-index: 1;
+      animation: fadeUp 0.6s ease both;
+      transition: box-shadow var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-lg); }
+    .card+.card { margin-top: 22px; animation-delay: 0.15s; }
+
+    .card-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 1.15rem; margin-bottom: 22px;
+      color: var(--text); display: flex; align-items: center; gap: 10px;
+    }
+    .card-title .dot {
+      width: 10px; height: 10px;
+      background: var(--accent); border-radius: 50%; flex-shrink: 0;
+    }
+
+    /* ── Paste Zone ── */
+    .paste-zone {
+      background: var(--bg);
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
+      text-align: center;
+      margin-bottom: 20px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+    }
+    .paste-zone:hover, .paste-zone:focus-within {
+      border-color: var(--accent);
+      background: #f8faf7;
+      box-shadow: 0 0 0 4px var(--accent-glow);
+    }
+    .paste-zone.pasted {
+      border-color: var(--green);
+      background: var(--green-light);
+      animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    .paste-zone .paste-icon { font-size: 28px; margin-bottom: 6px; }
+    .paste-zone input {
+      width: 100%; border: none; background: transparent;
+      text-align: center; font-family: 'DM Sans', sans-serif;
+      font-size: 14px; color: var(--text); outline: none; padding: 4px;
+    }
+    .paste-zone input::placeholder { color: #b0ada6; font-style: italic; }
+    .paste-zone .paste-hint {
+      font-size: 11px; color: var(--text-muted); margin-top: 4px;
+    }
+    .paste-feedback {
+      font-size: 11px; font-weight: 600; color: var(--green);
+      margin-top: 6px; opacity: 0; transition: opacity 0.3s;
+    }
+    .paste-feedback.show { opacity: 1; }
+
+    /* ── Inputs Row ── */
+    .inputs-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 10px; margin-bottom: 18px; align-items: end;
+    }
+    .swap-btn {
+      background: var(--bg); border: 1.5px solid var(--border);
+      border-radius: 50%; width: 38px; height: 38px;
+      font-size: 18px; cursor: pointer; color: var(--text-muted);
+      transition: all var(--transition);
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 4px; flex-shrink: 0;
+    }
+    .swap-btn:hover {
+      background: var(--accent-light); color: var(--accent);
+      border-color: var(--accent); transform: rotate(180deg);
+    }
+    label {
+      display: block; font-size: 10px; font-weight: 600;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 6px;
+    }
+    input[type='date'] {
+      width: 100%; padding: 11px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      color: var(--text); background: var(--bg);
+      transition: border-color var(--transition), box-shadow var(--transition);
+      outline: none;
+    }
+    input[type='date']:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    input[type='date'].error-input {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(192,57,43,0.15);
+    }
+
+    /* ── Dropdown rápido ── */
+    .quick-dropdown {
+      position: relative; display: inline-block; margin-bottom: 18px;
+    }
+    .quick-dropdown-btn {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px; font-weight: 500;
+      color: var(--text); cursor: pointer;
+      display: flex; align-items: center; gap: 8px;
+      transition: all var(--transition);
+    }
+    .quick-dropdown-btn:hover {
+      background: var(--bg); border-color: var(--accent);
+    }
+    .quick-dropdown-btn .chevron {
+      font-size: 12px; transition: transform 0.3s;
+    }
+    .quick-dropdown.open .quick-dropdown-btn .chevron {
+      transform: rotate(180deg);
+    }
+    .quick-dropdown-menu {
+      position: absolute; top: 100%; left: 0; margin-top: 4px;
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+      min-width: 200px; z-index: 10;
+      display: none; overflow: hidden;
+    }
+    .quick-dropdown.open .quick-dropdown-menu { display: block; }
+    .quick-dropdown-item {
+      padding: 10px 16px; cursor: pointer; font-size: 13px;
+      transition: background 0.15s; color: var(--text);
+      border-bottom: 1px solid #f0ede6;
+    }
+    .quick-dropdown-item:last-child { border-bottom: none; }
+    .quick-dropdown-item:hover { background: var(--accent-light); color: var(--accent); }
+
+    button {
+      width: 100%; padding: 14px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif; font-size: 15px;
+      font-weight: 600; cursor: pointer; letter-spacing: 0.5px;
+      transition: background var(--transition), transform 0.1s, box-shadow var(--transition);
+    }
+    button:hover { background: #1e4433; box-shadow: 0 4px 16px rgba(42,92,69,0.35); }
+    button:active { transform: scale(0.98); }
+    .btn-secondary {
+      background: transparent; color: var(--text-muted);
+      border: 1.5px solid var(--border); font-size: 12px;
+      padding: 8px 14px; width: auto; letter-spacing: 0.5px;
+    }
+    .btn-secondary:hover { background: var(--bg); box-shadow: none; color: var(--text); }
+    .btn-export {
+      width: auto; font-size: 12px; padding: 8px 16px;
+      background: var(--gold); letter-spacing: 0.3px;
+    }
+    .btn-export:hover { background: #9a6f0a; }
+
+    /* ── Results ── */
+    #resultado { margin-top: 26px; display: none; }
+    .result-total {
+      text-align: center; background: var(--accent-light);
+      border-radius: 14px; padding: 18px; margin-bottom: 18px;
+    }
+    .result-total .num {
+      font-family: 'DM Serif Display', serif;
+      font-size: 2.8rem; color: var(--accent); line-height: 1;
+    }
+    .result-total .lbl {
+      font-size: 12px; font-weight: 600; letter-spacing: 2px;
+      text-transform: uppercase; color: var(--accent); margin-top: 4px; opacity: 0.8;
+    }
+    .result-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .result-box { border-radius: 14px; padding: 18px 16px; text-align: center; }
+    .result-box.habiles { background: #EAF5EE; border: 1.5px solid #A8D5B5; }
+    .result-box.inhabiles { background: #FDECEA; border: 1.5px solid #F0B3AE; }
+    .result-box .num { font-family: 'DM Serif Display', serif; font-size: 2.4rem; line-height: 1; }
+    .result-box.habiles .num { color: #1E7A3E; }
+    .result-box.inhabiles .num { color: var(--red); }
+    .result-box .lbl { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; opacity: 0.8; }
+    .result-box.habiles .lbl { color: #1E7A3E; }
+    .result-box.inhabiles .lbl { color: var(--red); }
+    .result-box .sublbl { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    /* ── Lote Table ── */
+    .lote-table-wrapper { overflow-x: auto; margin-top: 16px; }
+    .lote-table {
+      width: 100%; border-collapse: collapse; font-size: 13px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .lote-table thead tr { background: var(--accent); color: #fff; }
+    .lote-table thead th {
+      padding: 10px 12px; font-weight: 600; font-size: 10px;
+      letter-spacing: 1.5px; text-transform: uppercase; text-align: center;
+    }
+    .lote-table thead th:first-child, .lote-table thead th:nth-child(2) { text-align: left; }
+    .lote-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; }
+    .lote-table tbody tr:hover { background: var(--bg); }
+    .lote-table tbody td { padding: 10px 12px; text-align: center; }
+    .lote-table tbody td:first-child, .lote-table tbody td:nth-child(2) { text-align: left; font-weight: 500; }
+    .lote-table .td-hab { color: #1E7A3E; font-weight: 600; }
+    .lote-table .td-inhab { color: var(--red); font-weight: 600; }
+    .lote-table .td-total { font-weight: 600; }
+    .lote-summary {
+      background: var(--accent-light); border-radius: var(--radius-sm);
+      padding: 14px 18px; margin-top: 14px; display: flex;
+      justify-content: space-around; flex-wrap: wrap; gap: 10px;
+      font-weight: 600; font-size: 13px;
+    }
+    .lote-summary span { color: var(--accent); }
+
+    /* ── Breakdown ── */
+    .breakdown {
+      margin-top: 14px; border-radius: var(--radius-sm);
+      border: 1.5px solid var(--border); overflow: hidden; font-size: 13px;
+    }
+    .breakdown-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px 14px; background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row .br-label { color: var(--text-muted); display: flex; align-items: center; gap: 6px; }
+    .breakdown-row .br-val { font-weight: 600; color: var(--text); }
+    .highlight-hab { background: #F3FBF5; }
+    .highlight-feri { background: #FFFBF0; }
+    .highlight-wknd { background: #FEF9F9; }
+    .highlight-custom { background: #F5F0FF; }
+
+    .holiday-list {
+      margin-top: 18px; border-radius: 14px; overflow: hidden;
+      border: 1.5px solid #F0C97A;
+    }
+    .holiday-list-header {
+      background: #FEF3DC; padding: 10px 16px;
+      font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #8A6100;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .holiday-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 16px; border-top: 1px solid #F0E4BE;
+      background: #FFFBF0; font-size: 13px; gap: 8px; flex-wrap: wrap;
+    }
+    .holiday-item .h-name { color: var(--text); font-weight: 500; }
+    .holiday-item .h-date { color: var(--text-muted); font-size: 12px; white-space: nowrap; }
+    .holiday-item .h-tag {
+      font-size: 10px; font-weight: 600; letter-spacing: 1px;
+      padding: 3px 8px; border-radius: 20px; white-space: nowrap;
+    }
+    .h-tag.weekend { background: #FDECEA; color: var(--red); }
+    .h-tag.weekday { background: #FEF3DC; color: #8A6100; }
+    .h-tag.custom { background: #EDE4FF; color: #5B2D8E; }
+    .no-holidays {
+      padding: 12px 16px; background: #FFFBF0;
+      font-size: 13px; color: var(--text-muted); border-top: 1px solid #F0E4BE;
+    }
+
+    .error {
+      text-align: center; color: var(--red); font-size: 14px;
+      padding: 12px; background: #FDECEA; border-radius: var(--radius-sm); margin-top: 10px;
+    }
+
+    /* ── Config Panel ── */
+    .config-toggle {
+      display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; user-select: none;
+    }
+    .config-toggle .arrow { transition: transform 0.3s; font-size: 14px; }
+    .config-toggle.open .arrow { transform: rotate(180deg); }
+    .config-panel {
+      display: none; margin-top: 16px; padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .config-panel.show { display: block; animation: fadeUp 0.3s ease both; }
+    .config-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 0; border-bottom: 1px solid #f0ede6; gap: 12px; flex-wrap: wrap;
+    }
+    .config-row:last-child { border-bottom: none; }
+    .config-row label.config-label {
+      font-size: 13px; font-weight: 500; color: var(--text);
+      letter-spacing: 0; text-transform: none; margin: 0; flex: 1; min-width: 140px;
+    }
+    .toggle-switch { position: relative; width: 48px; height: 26px; flex-shrink: 0; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider {
+      position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+      background: #ccc; border-radius: 26px; transition: var(--transition);
+    }
+    .toggle-slider::before {
+      content: ''; position: absolute; height: 20px; width: 20px;
+      left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: var(--transition);
+    }
+    .toggle-switch input:checked+.toggle-slider { background: var(--accent); }
+    .toggle-switch input:checked+.toggle-slider::before { transform: translateX(22px); }
+    .config-row .custom-date-group { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .config-row input[type='date'] { width: auto; min-width: 140px; padding: 8px 10px; font-size: 13px; }
+    .custom-date-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; width: 100%; }
+    .custom-date-chip {
+      font-size: 11px; background: #EDE4FF; color: #5B2D8E;
+      padding: 4px 10px; border-radius: 20px;
+      display: flex; align-items: center; gap: 6px; border: 1px solid #D4C4F0;
+    }
+    .custom-date-chip .remove-chip { cursor: pointer; font-weight: 700; color: #8B5CF6; font-size: 14px; line-height: 1; }
+    .custom-date-chip .remove-chip:hover { color: var(--red); }
+
+    /* ── Reference Table ── */
+    .ref-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .ref-table thead tr { background: var(--accent); color: #fff; }
+    .ref-table thead th { padding: 12px 16px; font-weight: 600; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; text-align: center; }
+    .ref-table thead th:first-child { text-align: left; border-radius: 8px 0 0 0; }
+    .ref-table thead th:last-child { border-radius: 0 8px 0 0; }
+    .ref-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    .ref-table tbody tr:last-child { border-bottom: none; }
+    .ref-table tbody tr:hover { background: var(--bg); }
+    .ref-table tbody td { padding: 14px 16px; text-align: center; }
+    .ref-table tbody td:first-child { text-align: left; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .season-icon { font-size: 18px; }
+    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-total { background: var(--accent-light); color: var(--accent); }
+    .badge-hab { background: #EAF5EE; color: #1E7A3E; }
+    .badge-inhab { background: #FDECEA; color: var(--red); }
+
+    /* ── History ── */
+    .history-card {
+      background: var(--surface); border-radius: var(--radius);
+      padding: 32px 36px; box-shadow: var(--shadow);
+      width: 100%; max-width: 650px; z-index: 1;
+      margin-top: 22px; animation: fadeUp 0.6s ease both; animation-delay: 0.25s;
+    }
+    .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .history-empty { font-size: 13px; color: var(--text-muted); text-align: center; padding: 16px 0; }
+    .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .history-table thead tr { background: var(--bg); }
+    .history-table thead th { padding: 8px 12px; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1.5px solid var(--border); }
+    .history-table tbody tr { border-bottom: 1px solid var(--border); transition: background 0.12s; cursor: pointer; }
+    .history-table tbody tr:last-child { border-bottom: none; }
+    .history-table tbody tr:hover { background: var(--accent-light); }
+    .history-table tbody td { padding: 10px 12px; color: var(--text); }
+    .history-table tbody td:first-child { color: var(--text-muted); font-size: 12px; }
+    .ht-hab { color: #1E7A3E; font-weight: 600; }
+    .ht-inhab { color: var(--red); font-weight: 600; }
+    .ht-total { font-weight: 600; }
+    .ht-range { font-size: 11px; color: var(--text-muted); }
+    .ht-badge {
+      display: inline-block; background: var(--accent-light); color: var(--accent);
+      font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1A1A1A; color: #fff; padding: 12px 24px;
+      border-radius: 30px; font-size: 13px; font-weight: 500;
+      z-index: 1000; transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+      pointer-events: none;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+
+    @keyframes fadeDown { from { opacity:0; transform:translateY(-16px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes pop { 0%{transform:scale(0.7);opacity:0;} 70%{transform:scale(1.05);} 100%{transform:scale(1);opacity:1;} }
+    .pop { animation: pop 0.4s cubic-bezier(0.34,1.56,0.64,1) both; }
+
+    footer { margin-top: 36px; font-size: 12px; color: var(--text-muted); text-align: center; z-index: 1; animation: fadeUp 0.6s ease both; animation-delay: 0.35s; }
+
+    @media (max-width: 520px) {
+      .inputs-row { grid-template-columns: 1fr; }
+      .swap-btn { margin: 0 auto; transform: rotate(90deg); }
+      .swap-btn:hover { transform: rotate(270deg); }
+      .result-row { grid-template-columns: 1fr; }
+      .card { padding: 24px 18px; }
+      .history-card { padding: 24px 18px; }
+      .config-row { flex-direction: column; align-items: flex-start; }
+      .lote-summary { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
 <body>
 
-<div class="card">
-<h2>Calculadora Días Hábiles</h2>
+  <header>
+    <div class="eyebrow">Herramienta Interna · Nivel Pro</div>
+    <h1>Calculadora de<br />Días Hábiles</h1>
+    <p>Selecciona, pega desde Excel o procesa múltiples líneas.</p>
+  </header>
 
-<input type="date" id="fechaInicio">
-<input type="date" id="fechaFin">
-<button onclick="calcular()">Calcular</button>
+  <!-- Main Calculator Card -->
+  <div class="card" id="mainCard">
+    <div class="card-title"><span class="dot"></span>Calculadora</div>
 
-<div id="resultado"></div>
-</div>
+    <!-- Paste Zone -->
+    <div class="paste-zone" id="pasteZone" tabindex="0">
+      <div class="paste-icon">📋</div>
+      <input type="text" id="pasteInput" placeholder="Pega aquí tu rango desde Excel…" aria-label="Pegar rango de fechas" />
+      <div class="paste-hint">Ejemplo: <strong>16-07-2024 21-07-2024</strong> &nbsp;·&nbsp; También: 16/07/2024 - 21/07/2024<br />Para <strong>varias líneas</strong>, pega varios pares, uno por línea.</div>
+      <div class="paste-feedback" id="pasteFeedback">✅ ¡Fechas detectadas y cargadas!</div>
+    </div>
 
-<script>
-// ─────────────────────────────
-// PARSE FECHA SEGURO
-// ─────────────────────────────
-function parseFechaTexto(txt) {
-  const m = txt.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
-  if (!m) return null;
-  return `${m[3]}-${m[2]}-${m[1]}`;
-}
+    <!-- Date Inputs -->
+    <div class="inputs-row">
+      <div>
+        <label for="fechaInicio">Fecha Inicio</label>
+        <input type="date" id="fechaInicio" />
+      </div>
+      <button class="swap-btn" id="swapBtn" title="Intercambiar fechas" aria-label="Intercambiar fechas">⇄</button>
+      <div>
+        <label for="fechaFin">Fecha Fin</label>
+        <input type="date" id="fechaFin" />
+      </div>
+    </div>
 
-// ─────────────────────────────
-// EXTRAER 2 FECHAS EXACTAS
-// ─────────────────────────────
-function extraerFechasDeLinea(linea) {
-  const matches = linea.match(/\d{2}[-\/]\d{2}[-\/]\d{4}/g);
-  if (!matches || matches.length < 2) return null;
+    <!-- Dropdown rápido -->
+    <div class="quick-dropdown" id="quickDropdown">
+      <button class="quick-dropdown-btn" id="quickDropdownBtn">
+        ⚡ Rango rápido <span class="chevron">▼</span>
+      </button>
+      <div class="quick-dropdown-menu" id="quickDropdownMenu">
+        <div class="quick-dropdown-item" data-range="today">Hoy</div>
+        <div class="quick-dropdown-item" data-range="this-week">Esta semana</div>
+        <div class="quick-dropdown-item" data-range="next-week">Próxima semana</div>
+        <div class="quick-dropdown-item" data-range="this-month">Este mes</div>
+        <div class="quick-dropdown-item" data-range="last-month">Mes pasado</div>
+        <div class="quick-dropdown-item" data-range="this-year">Este año</div>
+      </div>
+    </div>
 
-  return [
-    parseFechaTexto(matches[0]),
-    parseFechaTexto(matches[1])
-  ];
-}
+    <button onclick="calcular()">🔍 Calcular Días</button>
+    <div id="resultado"><div id="resultado-content"></div></div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+      <button class="btn-secondary btn-export" onclick="exportarCSV()" title="Exportar a CSV">📥 Exportar CSV</button>
+      <button class="btn-secondary btn-export" onclick="copiarResultado()" title="Copiar al portapapeles">📋 Copiar</button>
+    </div>
+  </div>
 
-// ─────────────────────────────
-// PEGADO DESDE EXCEL (CORRECTO)
-// ─────────────────────────────
-document.addEventListener("paste", function(e) {
-  const texto = e.clipboardData.getData("text").trim();
+  <!-- Config Card -->
+  <div class="card" id="configCard">
+    <div class="config-toggle" id="configToggle">
+      <div class="card-title" style="margin-bottom:0"><span class="dot"></span>⚙️ Configuración Avanzada</div>
+      <span class="arrow">▼</span>
+    </div>
+    <div class="config-panel" id="configPanel">
+      <div class="config-row">
+        <label class="config-label">Incluir sábados como hábiles</label>
+        <label class="toggle-switch"><input type="checkbox" id="cfgSabadosHabiles" onchange="guardarConfig(); calcular();" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="config-row">
+        <label class="config-label">Incluir domingos como hábiles</label>
+        <label class="toggle-switch"><input type="checkbox" id="cfgDomingosHabiles" onchange="guardarConfig(); calcular();" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="config-row">
+        <label class="config-label">Considerar feriados nacionales (Chile)</label>
+        <label class="toggle-switch"><input type="checkbox" id="cfgFeriadosActivos" checked onchange="guardarConfig(); calcular();" /><span class="toggle-slider"></span></label>
+      </div>
+      <div class="config-row">
+        <label class="config-label" style="width:100%;">Días inhábiles personalizados</label>
+        <div class="custom-date-group">
+          <input type="date" id="customDateInput" />
+          <button class="btn-secondary" onclick="agregarFechaPersonalizada()" style="padding:8px 14px;">+ Agregar</button>
+        </div>
+        <div class="custom-date-chips" id="customDateChips"></div>
+        <button class="btn-secondary" onclick="limpiarFechasPersonalizadas()" style="margin-top:6px;font-size:11px;">🗑 Limpiar todas</button>
+      </div>
+    </div>
+  </div>
 
-  const filas = texto.split(/\r?\n/).filter(f => f.trim());
-  const resultados = [];
-
-  filas.forEach(fila => {
-    const fechas = extraerFechasDeLinea(fila);
-    if (!fechas) return;
-
-    const [inicio, fin] = fechas;
-
-    const calc = calcularRango(inicio, fin);
-    if (calc) {
-      resultados.push({ inicio, fin, ...calc });
-    }
-  });
-
-  if (resultados.length === 0) return;
-
-  e.preventDefault();
-
-  // SOLO UNA FILA → comportamiento normal
-  if (resultados.length === 1) {
-    fechaInicio.value = resultados[0].inicio;
-    fechaFin.value = resultados[0].fin;
-    mostrarResultadoIndividual(resultados[0]);
-    return;
-  }
-
-  // MULTIPLES FILAS → tabla
-  mostrarTablaResultados(resultados);
-});
-
-// ─────────────────────────────
-// CALCULO (CORREGIDO)
-// ─────────────────────────────
-function calcularRango(inicio, fin) {
-  const d1 = new Date(inicio + "T00:00:00");
-  const d2 = new Date(fin + "T00:00:00");
-
-  if (d2 < d1) return null;
-
-  const feriados = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
-
-  let habiles = 0;
-  let inhabiles = 0;
-
-  let d = new Date(d1);
-  while (d <= d2) {
-    const dow = d.getDay();
-    const isWeekend = (dow === 0 || dow === 6);
-    const isFeriado = feriados[fmtKey(d)];
-
-    if (isWeekend || isFeriado) inhabiles++;
-    else habiles++;
-
-    d.setDate(d.getDate() + 1);
-  }
-
-  return {
-    total: habiles + inhabiles,
-    habiles,
-    inhabiles
-  };
-}
-
-// ─────────────────────────────
-// RESULTADO INDIVIDUAL
-// ─────────────────────────────
-function mostrarResultadoIndividual(r) {
-  resultado.innerHTML = `
-    <p><b>${r.total} días</b></p>
-    <p style="color:green">${r.habiles} hábiles</p>
-    <p style="color:red">${r.inhabiles} inhábiles</p>
-  `;
-}
-
-// ─────────────────────────────
-// TABLA MULTIPLE DETALLADA
-// ─────────────────────────────
-function mostrarTablaResultados(data) {
-  const rows = data.map(r => `
-    <tr>
-      <td>${r.inicio}</td>
-      <td>${r.fin}</td>
-      <td><b>${r.total} días</b></td>
-      <td style="color:green">${r.habiles}</td>
-      <td style="color:red">${r.inhabiles}</td>
-    </tr>
-  `).join('');
-
-  resultado.innerHTML = `
-    <table>
-      <tr>
-        <th>Inicio</th>
-        <th>Fin</th>
-        <th>Total</th>
-        <th>Hábiles</th>
-        <th>Inhábiles</th>
-      </tr>
-      ${rows}
+  <!-- Reference Table Card -->
+  <div class="card">
+    <div class="card-title"><span class="dot"></span>Referencia de Vacaciones</div>
+    <table class="ref-table">
+      <thead><tr><th>Temporada</th><th>Total Días</th><th>Hábiles</th><th>Inhábiles</th></tr></thead>
+      <tbody>
+        <tr><td><span class="season-icon">☀️</span> Verano</td><td><span class="badge badge-total">28</span></td><td><span class="badge badge-hab">20</span></td><td><span class="badge badge-inhab">8</span></td></tr>
+        <tr><td><span class="season-icon">❄️</span> Invierno</td><td><span class="badge badge-total">7</span></td><td><span class="badge badge-hab">5</span></td><td><span class="badge badge-inhab">2</span></td></tr>
+      </tbody>
     </table>
-  `;
-}
+    <p style="margin-top:14px;font-size:12px;color:var(--text-muted);">Hábiles = Lunes a Viernes (configurable) · Inhábiles = Fines de semana y Feriados</p>
+  </div>
 
-// INIT
-const hoy=new Date();
-const fin=new Date(); fin.setDate(hoy.getDate()+7);
+  <!-- History Card -->
+  <div class="history-card">
+    <div class="history-header">
+      <div class="card-title" style="margin-bottom:0"><span class="dot"></span>Historial de Búsquedas</div>
+      <button class="btn-secondary" onclick="clearHistory()">🗑 Limpiar</button>
+    </div>
+    <div id="history-content"><div class="history-empty">Aún no hay búsquedas registradas.</div></div>
+  </div>
 
-fechaInicio.value=hoy.toISOString().split('T')[0];
-fechaFin.value=fin.toISOString().split('T')[0];
+  <footer>Considera reglas configurables · Feriados nacionales Chile (2020–2035) · Zona horaria neutra · Procesa múltiples rangos</footer>
 
-</script>
+  <div class="toast" id="toast"></div>
 
+  <script>
+    // ───────────────────────────────────────────────
+    //  Easter & Chilean Holidays
+    // ───────────────────────────────────────────────
+    function getEaster(y) {
+      const a = y%19, b = Math.floor(y/100), c = y%100;
+      const d = Math.floor(b/4), e = b%4, f = Math.floor((b+8)/25);
+      const g = Math.floor((b-f+1)/3), h = (19*a+b-d-g+15)%30;
+      const i = Math.floor(c/4), k = c%4, l = (32+2*e+2*i-h-k)%7;
+      const m = Math.floor((a+11*h+22*l)/451);
+      const month = Math.floor((h+l-7*m+114)/31);
+      const day = ((h+l-7*m+114)%31)+1;
+      return new Date(y, month-1, day);
+    }
+    function nearestMonday(y, month, day) {
+      const d = new Date(y, month-1, day);
+      const deltas = [1,0,-1,-2,-3,3,2];
+      d.setDate(d.getDate() + deltas[d.getDay()]);
+      return d;
+    }
+    function fmtKey(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+    function getChileanHolidays(y) {
+      const holidays = [];
+      const add = (date, name) => holidays.push({ key: fmtKey(date), name });
+      [[1,1,'Año Nuevo'],[5,1,'Día del Trabajo'],[5,21,'Glorias Navales'],
+       [7,16,'Virgen del Carmen'],[8,15,'Asunción de la Virgen'],
+       [9,18,'Independencia Nacional'],[9,19,'Glorias del Ejército'],
+       [10,31,'Iglesias Evangélicas y Protestantes'],
+       [11,1,'Día de Todos los Santos'],[12,8,'Inmaculada Concepción'],
+       [12,25,'Navidad']].forEach(([m,d,n]) => add(new Date(y, m-1, d), n));
+      const easter = getEaster(y);
+      const vs = new Date(easter); vs.setDate(easter.getDate()-2);
+      const ss = new Date(easter); ss.setDate(easter.getDate()-1);
+      add(vs, 'Viernes Santo'); add(ss, 'Sábado Santo');
+      add(nearestMonday(y,6,21), 'Día de los Pueblos Indígenas');
+      add(nearestMonday(y,6,29), 'San Pedro y San Pablo');
+      add(nearestMonday(y,10,12), 'Encuentro de Dos Mundos');
+      if (new Date(y,0,1).getDay()===6) add(new Date(y,0,2), 'Feriado por Año Nuevo (traslado)');
+      const seen = new Set();
+      return holidays.filter(h => { if(seen.has(h.key)) return false; seen.add(h.key); return true; });
+    }
+    function buildHolidayMap(y1, y2) {
+      const map = {};
+      for (let y=y1; y<=y2; y++) getChileanHolidays(y).forEach(h => { map[h.key]=h.name; });
+      return map;
+    }
+
+    // ───────────────────────────────────────────────
+    //  Config
+    // ───────────────────────────────────────────────
+    const CONFIG_KEY = 'diasHabilesConfig';
+    function loadConfig() { try { return JSON.parse(localStorage.getItem(CONFIG_KEY)) || {}; } catch { return {}; } }
+    function saveConfigToStorage(cfg) { localStorage.setItem(CONFIG_KEY, JSON.stringify(cfg)); }
+    function guardarConfig() {
+      const cfg = {
+        sabadosHabiles: document.getElementById('cfgSabadosHabiles').checked,
+        domingosHabiles: document.getElementById('cfgDomingosHabiles').checked,
+        feriadosActivos: document.getElementById('cfgFeriadosActivos').checked,
+        fechasPersonalizadas: getFechasPersonalizadas(),
+      };
+      saveConfigToStorage(cfg);
+    }
+    function getFechasPersonalizadas() {
+      const chips = document.querySelectorAll('.custom-date-chip');
+      const fechas = [];
+      chips.forEach(chip => {
+        const iso = chip.getAttribute('data-iso');
+        const nombre = chip.getAttribute('data-nombre') || 'Fecha personalizada';
+        if (iso) fechas.push({ iso, nombre });
+      });
+      return fechas;
+    }
+    function aplicarConfig() {
+      const cfg = loadConfig();
+      document.getElementById('cfgSabadosHabiles').checked = !!cfg.sabadosHabiles;
+      document.getElementById('cfgDomingosHabiles').checked = !!cfg.domingosHabiles;
+      document.getElementById('cfgFeriadosActivos').checked = cfg.feriadosActivos !== false;
+      if (cfg.fechasPersonalizadas && Array.isArray(cfg.fechasPersonalizadas)) {
+        cfg.fechasPersonalizadas.forEach(f => agregarChipFecha(f.iso, f.nombre));
+      }
+    }
+    function agregarFechaPersonalizada() {
+      const input = document.getElementById('customDateInput');
+      const val = input.value; if (!val) return;
+      agregarChipFecha(val, 'Fecha inhábil personalizada');
+      input.value = ''; guardarConfig(); calcular(); showToast('Fecha personalizada agregada ✅');
+    }
+    function agregarChipFecha(iso, nombre) {
+      const existentes = document.querySelectorAll('.custom-date-chip');
+      for (const chip of existentes) { if (chip.getAttribute('data-iso') === iso) return; }
+      const chipsContainer = document.getElementById('customDateChips');
+      const d = new Date(iso+'T00:00:00');
+      const display = d.toLocaleDateString('es-CL', { day:'2-digit', month:'short', year:'numeric', timeZone:'UTC' });
+      const chip = document.createElement('span');
+      chip.className = 'custom-date-chip';
+      chip.setAttribute('data-iso', iso);
+      chip.setAttribute('data-nombre', nombre);
+      chip.innerHTML = `📌 ${display} <span class="remove-chip" onclick="eliminarChip(this, '${iso}')" title="Eliminar">×</span>`;
+      chipsContainer.appendChild(chip);
+    }
+    function eliminarChip(el, iso) { el.closest('.custom-date-chip').remove(); guardarConfig(); calcular(); showToast('Fecha personalizada eliminada'); }
+    function limpiarFechasPersonalizadas() { document.getElementById('customDateChips').innerHTML = ''; guardarConfig(); calcular(); showToast('Fechas personalizadas limpiadas'); }
+
+    // ───────────────────────────────────────────────
+    //  Toast
+    // ───────────────────────────────────────────────
+    function showToast(msg) {
+      const toast = document.getElementById('toast');
+      toast.textContent = msg; toast.classList.add('show');
+      clearTimeout(toast._timeout);
+      toast._timeout = setTimeout(() => toast.classList.remove('show'), 2200);
+    }
+
+    // ───────────────────────────────────────────────
+    //  Flexible Date Parser
+    // ───────────────────────────────────────────────
+    function parseFlexibleDate(str) {
+      str = str.trim(); if (!str) return null;
+      let m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+      if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+      m = str.match(/^(\d{1,2})[-\/\.](\d{1,2})[-\/\.](\d{4})$/);
+      if (m) {
+        let d = +m[1], mo = +m[2], y = +m[3];
+        if (d > 12 && mo <= 12) return new Date(y, mo-1, d);
+        if (mo > 12 && d <= 12) return new Date(y, d-1, mo);
+        return new Date(y, mo-1, d);
+      }
+      m = str.match(/^(\d{4})[\/\.](\d{1,2})[\/\.](\d{1,2})$/);
+      if (m) return new Date(+m[1], +m[2]-1, +m[3]);
+      return null;
+    }
+
+    function extractDatesFromText(text) {
+      const patterns = [/\d{4}-\d{1,2}-\d{1,2}/g, /\d{1,2}[-\/\.]\d{1,2}[-\/\.]\d{4}/g];
+      let allMatches = [];
+      patterns.forEach(p => { const found = text.match(p); if (found) allMatches = allMatches.concat(found); });
+      const dates = [];
+      allMatches.forEach(match => {
+        const d = parseFlexibleDate(match);
+        if (d && !isNaN(d.getTime())) dates.push(d);
+      });
+      const unique = []; const seen = new Set();
+      dates.forEach(d => { const key = fmtKey(d); if (!seen.has(key)) { seen.add(key); unique.push(d); } });
+      unique.sort((a,b) => a-b);
+      return unique;
+    }
+
+    // ───────────────────────────────────────────────
+    //  Paste handler (soporte multilínea)
+    // ───────────────────────────────────────────────
+    function handlePaste(text) {
+      const lines = text.split(/\r?\n/).filter(l => l.trim().length > 0);
+      // Si hay más de una línea, intentar extraer pares de fechas por línea
+      if (lines.length > 1) {
+        const rangos = [];
+        for (const line of lines) {
+          const dates = extractDatesFromText(line);
+          if (dates.length >= 2) {
+            rangos.push({ inicio: dates[0], fin: dates[dates.length-1] });
+          } else if (dates.length === 1) {
+            rangos.push({ inicio: dates[0], fin: dates[0] });
+          }
+        }
+        if (rangos.length > 0) {
+          calcularLote(rangos);
+          document.getElementById('pasteZone').classList.add('pasted');
+          const fb = document.getElementById('pasteFeedback');
+          fb.textContent = `✅ ${rangos.length} rangos detectados y procesados.`;
+          fb.classList.add('show');
+          setTimeout(() => { document.getElementById('pasteZone').classList.remove('pasted'); fb.classList.remove('show'); fb.textContent = '✅ ¡Fechas detectadas y cargadas!'; }, 2500);
+          return true;
+        }
+      }
+      // Una sola línea (o fallback)
+      const dates = extractDatesFromText(text);
+      if (dates.length >= 2) {
+        setFechas(dates[0], dates[dates.length-1]);
+        calcular();
+        document.getElementById('pasteZone').classList.add('pasted');
+        const fb = document.getElementById('pasteFeedback');
+        fb.textContent = '✅ Rango detectado y cargado.';
+        fb.classList.add('show');
+        setTimeout(() => { document.getElementById('pasteZone').classList.remove('pasted'); fb.classList.remove('show'); fb.textContent = '✅ ¡Fechas detectadas y cargadas!'; }, 2000);
+        return true;
+      } else if (dates.length === 1) {
+        // Un solo día: inicio=fin
+        setFechas(dates[0], dates[0]);
+        calcular();
+        document.getElementById('pasteZone').classList.add('pasted');
+        const fb = document.getElementById('pasteFeedback');
+        fb.textContent = '✅ Fecha única detectada (día específico).';
+        fb.classList.add('show');
+        setTimeout(() => { document.getElementById('pasteZone').classList.remove('pasted'); fb.classList.remove('show'); fb.textContent = '✅ ¡Fechas detectadas y cargadas!'; }, 2000);
+        return true;
+      }
+      return false;
+    }
+
+    function setFechas(d1, d2) {
+      const fmtISO = d => d.toISOString().split('T')[0];
+      document.getElementById('fechaInicio').value = fmtISO(d1);
+      document.getElementById('fechaFin').value = fmtISO(d2);
+      document.getElementById('fechaInicio').classList.remove('error-input');
+      document.getElementById('fechaFin').classList.remove('error-input');
+    }
+
+    // ───────────────────────────────────────────────
+    //  Cálculo de un rango individual (devuelve objeto)
+    // ───────────────────────────────────────────────
+    function calcularRango(d1, d2) {
+      const cfg = loadConfig();
+      const sabadosHabiles = !!cfg.sabadosHabiles;
+      const domingosHabiles = !!cfg.domingosHabiles;
+      const feriadosActivos = cfg.feriadosActivos !== false;
+      const fechasPersonalizadas = cfg.fechasPersonalizadas || [];
+      const customSet = new Set(); const customMap = {};
+      fechasPersonalizadas.forEach(f => { customSet.add(f.iso); customMap[f.iso] = f.nombre; });
+      const holidayMap = feriadosActivos ? buildHolidayMap(d1.getFullYear(), d2.getFullYear()) : {};
+
+      let habilesPuros = 0, feriadosWeekday = 0, finDeSemana = 0;
+      const feriadosEnRango = [], customEnRango = [];
+
+      let cursor = new Date(d1);
+      while (cursor <= d2) {
+        const dow = cursor.getDay();
+        const key = fmtKey(cursor);
+        const isWeekend = (dow===0 || dow===6);
+        const isFeriado = !!holidayMap[key];
+        const isCustom = customSet.has(key);
+        const isInhabilCustom = isCustom || (feriadosActivos && isFeriado);
+        let effectiveWeekend = isWeekend;
+        if (sabadosHabiles && dow===6) effectiveWeekend = false;
+        if (domingosHabiles && dow===0) effectiveWeekend = false;
+
+        if (effectiveWeekend) {
+          finDeSemana++;
+          if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: true });
+          if (isCustom) customEnRango.push({ key, name: customMap[key], onWeekend: true });
+        } else {
+          if (isInhabilCustom) {
+            feriadosWeekday++;
+            if (isFeriado) feriadosEnRango.push({ key, name: holidayMap[key], onWeekend: false });
+            if (isCustom) customEnRango.push({ key, name: customMap[key], onWeekend: false });
+          } else {
+            habilesPuros++;
+          }
+        }
+        cursor.setDate(cursor.getDate()+1);
+      }
+
+      const totalHabiles = habilesPuros;
+      const totalInhabiles = finDeSemana + feriadosWeekday;
+      const total = totalHabiles + totalInhabiles;
+      return {
+        inicio: d1, fin: d2, total, habiles: totalHabiles, inhabiles: totalInhabiles,
+        feriadosWeekday, finDeSemana, feriadosEnRango, customEnRango,
+        habilesPuros, holidayMap, customMap
+      };
+    }
+
+    // ───────────────────────────────────────────────
+    //  Mostrar resultado de UN rango
+    // ───────────────────────────────────────────────
+    function mostrarResultadoUnico(data) {
+      const { inicio, fin, total, habiles, inhabiles, feriadosWeekday, finDeSemana, feriadosEnRango, customEnRango, habilesPuros } = data;
+      const pctHab = total>0 ? Math.round((habiles/total)*100) : 0;
+      const pctInhab = total>0 ? Math.round((inhabiles/total)*100) : 0;
+      const opts = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
+      const fmtD1 = inicio.toLocaleDateString('es-CL', opts);
+      const fmtD2 = fin.toLocaleDateString('es-CL', opts);
+      const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+      const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+
+      const breakdownRows = [
+        { cls:'highlight-hab', label:'📅 Días hábiles (según reglas)', val:habilesPuros, color:'#1E7A3E' },
+        { cls:'highlight-wknd', label:'📆 Fines de semana no hábiles', val:finDeSemana, color:'var(--red)' },
+        { cls:'highlight-feri', label:'🎌 Feriados que restan hábiles', val:feriadosWeekday, color:'#8A6100' },
+      ];
+      if (customEnRango.filter(f=>!f.onWeekend).length > 0) {
+        breakdownRows.push({ cls:'highlight-custom', label:'📌 Fechas personalizadas (inhábiles)', val:customEnRango.filter(f=>!f.onWeekend).length, color:'#5B2D8E' });
+      }
+
+      const weekdayFeriados = feriadosEnRango.filter(f=>!f.onWeekend);
+      const weekendFeriados = feriadosEnRango.filter(f=>f.onWeekend);
+      const weekdayCustom = customEnRango.filter(f=>!f.onWeekend);
+      const weekendCustom = customEnRango.filter(f=>f.onWeekend);
+      let feriadoRows = '';
+      const allInhabiles = [...weekdayFeriados, ...weekdayCustom, ...weekendFeriados, ...weekendCustom];
+      if (allInhabiles.length===0) {
+        feriadoRows = '<div class="no-holidays">Sin feriados ni días inhábiles en este período.</div>';
+      } else {
+        const renderItems = (items, tagClass, icon) => items.map(f => {
+          const d = new Date(f.key+'T00:00:00');
+          const lbl = `${dayNames[d.getDay()]} ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+          return `<div class="holiday-item"><span class="h-name">${icon} ${f.name}</span><span class="h-date">${lbl}</span><span class="h-tag ${tagClass}">${tagClass==='weekend'?'Fin de semana':tagClass==='weekday'?'Resta hábil':'Personalizada'}</span></div>`;
+        }).join('');
+        if (weekdayFeriados.length) feriadoRows += renderItems(weekdayFeriados, 'weekday', '🎌');
+        if (weekdayCustom.length) feriadoRows += renderItems(weekdayCustom, 'custom', '📌');
+        if (weekendFeriados.length) feriadoRows += renderItems(weekendFeriados, 'weekend', '📆');
+        if (weekendCustom.length) feriadoRows += renderItems(weekendCustom, 'custom', '📆');
+      }
+
+      return `
+        <div class="result-total pop">
+          <div class="num">${total}</div>
+          <div class="lbl">Días Totales</div>
+          <div style="font-size:12px;color:var(--accent);opacity:0.7;margin-top:4px">${fmtD1} — ${fmtD2}</div>
+        </div>
+        <div class="result-row">
+          <div class="result-box habiles pop" style="animation-delay:0.08s">
+            <div class="num">${habiles}</div><div class="lbl">Hábiles</div><div class="sublbl">${pctHab}% del total</div>
+          </div>
+          <div class="result-box inhabiles pop" style="animation-delay:0.16s">
+            <div class="num">${inhabiles}</div><div class="lbl">Inhábiles</div><div class="sublbl">${pctInhab}% del total</div>
+          </div>
+        </div>
+        <div class="breakdown pop" style="animation-delay:0.2s">
+          ${breakdownRows.map(r => `<div class="breakdown-row ${r.cls}"><span class="br-label">${r.label}</span><span class="br-val" style="color:${r.color}">${r.val}</span></div>`).join('')}
+        </div>
+        <div class="holiday-list pop" style="animation-delay:0.28s">
+          <div class="holiday-list-header">🎌 Días inhábiles en el período</div>
+          ${feriadoRows}
+        </div>`;
+    }
+
+    // ───────────────────────────────────────────────
+    //  Modo Lote (múltiples rangos)
+    // ───────────────────────────────────────────────
+    function calcularLote(rangos) {
+      const resultados = rangos.map(r => {
+        const d1 = new Date(r.inicio.getFullYear(), r.inicio.getMonth(), r.inicio.getDate());
+        const d2 = new Date(r.fin.getFullYear(), r.fin.getMonth(), r.fin.getDate());
+        return calcularRango(d1, d2);
+      });
+      const res = document.getElementById('resultado');
+      const cont = document.getElementById('resultado-content');
+      res.style.display = 'block';
+
+      const opts = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
+      let filas = '';
+      let totalGlobal = 0, habGlobal = 0, inhabGlobal = 0;
+      resultados.forEach((r, i) => {
+        const iniStr = r.inicio.toLocaleDateString('es-CL', opts);
+        const finStr = r.fin.toLocaleDateString('es-CL', opts);
+        filas += `<tr>
+          <td>${iniStr}</td><td>${finStr}</td>
+          <td class="td-total">${r.total}</td>
+          <td class="td-hab">${r.habiles}</td>
+          <td class="td-inhab">${r.inhabiles}</td>
+        </tr>`;
+        totalGlobal += r.total; habGlobal += r.habiles; inhabGlobal += r.inhabiles;
+      });
+
+      cont.innerHTML = `
+        <div class="result-total pop">
+          <div class="num" style="font-size:2rem;">📋 Lote de ${resultados.length} rangos</div>
+          <div class="lbl">Procesados individualmente</div>
+        </div>
+        <div class="lote-table-wrapper pop" style="animation-delay:0.1s">
+          <table class="lote-table">
+            <thead><tr><th>Inicio</th><th>Fin</th><th>Total</th><th>Hábiles</th><th>Inhábiles</th></tr></thead>
+            <tbody>${filas}</tbody>
+          </table>
+        </div>
+        <div class="lote-summary pop" style="animation-delay:0.2s">
+          <span>🔢 Totales:</span> <span>📊 ${totalGlobal} días</span> <span>✅ ${habGlobal} hábiles</span> <span>❌ ${inhabGlobal} inhábiles</span>
+        </div>
+        <p style="margin-top:10px;font-size:12px;color:var(--text-muted);text-align:center;">Cada línea se calculó de forma independiente.</p>
+      `;
+
+      // Guardar en historial como lote
+      saveHistory({
+        time: new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'}),
+        date: new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}),
+        tipo: 'lote',
+        totalGlobal, habGlobal, inhabGlobal,
+        resultados: resultados.map(r => ({
+          inicioISO: fmtKey(r.inicio),
+          finISO: fmtKey(r.fin),
+          total: r.total, habiles: r.habiles, inhabiles: r.inhabiles,
+        })),
+        inicio: 'Lote', fin: `${resultados.length} rangos`,
+      });
+      // Guardar última búsqueda (para exportar)
+      saveLastSearch({
+        tipo: 'lote',
+        resultados: resultados.map(r => ({
+          inicioISO: fmtKey(r.inicio), finISO: fmtKey(r.fin),
+          inicio: r.inicio.toLocaleDateString('es-CL', opts),
+          fin: r.fin.toLocaleDateString('es-CL', opts),
+          total: r.total, habiles: r.habiles, inhabiles: r.inhabiles,
+        })),
+        totalGlobal, habGlobal, inhabGlobal,
+      });
+    }
+
+    // ───────────────────────────────────────────────
+    //  Calcular (un solo rango desde inputs)
+    // ───────────────────────────────────────────────
+    function calcular() {
+      const inicio = document.getElementById('fechaInicio').value;
+      const fin = document.getElementById('fechaFin').value;
+      const res = document.getElementById('resultado');
+      const cont = document.getElementById('resultado-content');
+      const iniInput = document.getElementById('fechaInicio');
+      const finInput = document.getElementById('fechaFin');
+      res.style.display = 'block';
+      iniInput.classList.remove('error-input'); finInput.classList.remove('error-input');
+
+      if (!inicio || !fin) {
+        cont.innerHTML = '<div class="error">Por favor ingresa ambas fechas.</div>';
+        if(!inicio) iniInput.classList.add('error-input');
+        if(!fin) finInput.classList.add('error-input');
+        return;
+      }
+      const d1 = new Date(inicio+'T00:00:00');
+      const d2 = new Date(fin+'T00:00:00');
+      if (isNaN(d1.getTime()) || isNaN(d2.getTime())) {
+        cont.innerHTML = '<div class="error">Una o ambas fechas no son válidas.</div>';
+        if(isNaN(d1.getTime())) iniInput.classList.add('error-input');
+        if(isNaN(d2.getTime())) finInput.classList.add('error-input');
+        return;
+      }
+      if (d2 < d1) {
+        cont.innerHTML = '<div class="error">La fecha de fin debe ser igual o posterior a la de inicio.</div>';
+        finInput.classList.add('error-input');
+        return;
+      }
+
+      const data = calcularRango(d1, d2);
+      cont.innerHTML = mostrarResultadoUnico(data);
+
+      const opts = { day:'numeric', month:'short', year:'numeric', timeZone:'UTC' };
+      const lastData = {
+        tipo: 'simple',
+        inicioISO: fmtKey(d1), finISO: fmtKey(d2),
+        inicio: d1.toLocaleDateString('es-CL', opts),
+        fin: d2.toLocaleDateString('es-CL', opts),
+        total: data.total, habiles: data.habiles, inhabiles: data.inhabiles,
+        feriados: data.feriadosWeekday,
+      };
+      saveLastSearch(lastData);
+      saveHistory({
+        time: new Date().toLocaleTimeString('es-CL', {hour:'2-digit', minute:'2-digit'}),
+        date: new Date().toLocaleDateString('es-CL', {day:'2-digit', month:'2-digit', year:'numeric'}),
+        tipo: 'simple',
+        inicio: lastData.inicio, fin: lastData.fin,
+        inicioISO: lastData.inicioISO, finISO: lastData.finISO,
+        total: data.total, habiles: data.habiles, inhabiles: data.inhabiles,
+        feriados: data.feriadosWeekday,
+      });
+      res.scrollIntoView({ behavior:'smooth', block:'nearest' });
+    }
+
+    // ───────────────────────────────────────────────
+    //  Last Search
+    // ───────────────────────────────────────────────
+    const LAST_SEARCH_KEY = 'diasHabilesLastSearch';
+    function saveLastSearch(data) { localStorage.setItem(LAST_SEARCH_KEY, JSON.stringify(data)); }
+    function loadLastSearch() { try { return JSON.parse(localStorage.getItem(LAST_SEARCH_KEY)) || null; } catch { return null; } }
+
+    // ───────────────────────────────────────────────
+    //  History
+    // ───────────────────────────────────────────────
+    const HISTORY_KEY = 'diasHabilesHistory';
+    function loadHistory() { try { return JSON.parse(localStorage.getItem(HISTORY_KEY)) || []; } catch { return []; } }
+    function saveHistory(entry) {
+      const hist = loadHistory();
+      hist.unshift(entry);
+      if (hist.length > 25) hist.pop();
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(hist));
+      renderHistory();
+    }
+    function clearHistory() { localStorage.removeItem(HISTORY_KEY); renderHistory(); showToast('Historial limpiado'); }
+    function renderHistory() {
+      const hist = loadHistory();
+      const el = document.getElementById('history-content');
+      if (hist.length === 0) { el.innerHTML = '<div class="history-empty">Aún no hay búsquedas registradas.</div>'; return; }
+      const rows = hist.map((h, i) => {
+        if (h.tipo === 'lote') {
+          return `<tr onclick="restoreSearch(${i})" title="Click para cargar este lote" style="cursor:pointer;">
+            <td>${h.date} ${h.time}</td>
+            <td class="ht-range">📋 Lote (${h.fin})</td>
+            <td class="ht-total">${h.totalGlobal||'-'}</td>
+            <td class="ht-hab">${h.habGlobal||'-'}</td>
+            <td class="ht-inhab">${h.inhabGlobal||'-'}</td>
+            <td><span class="ht-badge">Lote</span></td>
+          </tr>`;
+        } else {
+          return `<tr onclick="restoreSearch(${i})" title="Click para cargar estas fechas" style="cursor:pointer;">
+            <td>${h.date} ${h.time}</td>
+            <td class="ht-range">${h.inicio} → ${h.fin}</td>
+            <td class="ht-total">${h.total}</td>
+            <td class="ht-hab">${h.habiles}</td>
+            <td class="ht-inhab">${h.inhabiles}</td>
+            <td></td>
+          </tr>`;
+        }
+      }).join('');
+      el.innerHTML = `
+        <table class="history-table">
+          <thead><tr><th>Hora</th><th>Período</th><th>Total</th><th>Hábiles</th><th>Inhábiles</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <p style="margin-top:10px;font-size:11px;color:var(--text-muted);text-align:right">Haz clic en una fila para restaurar</p>`;
+    }
+    function restoreSearch(index) {
+      const hist = loadHistory();
+      const entry = hist[index];
+      if (!entry) return;
+      if (entry.tipo === 'lote' && entry.resultados) {
+        // Restaurar lote: mostrar directamente
+        const rangos = entry.resultados.map(r => ({
+          inicio: new Date(r.inicioISO+'T00:00:00'),
+          fin: new Date(r.finISO+'T00:00:00')
+        }));
+        calcularLote(rangos);
+      } else if (entry.inicioISO) {
+        document.getElementById('fechaInicio').value = entry.inicioISO;
+        document.getElementById('fechaFin').value = entry.finISO;
+        calcular();
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ───────────────────────────────────────────────
+    //  Export & Copy
+    // ───────────────────────────────────────────────
+    function exportarCSV() {
+      const last = loadLastSearch();
+      if (!last) { showToast('Primero realiza un cálculo'); return; }
+      let csvRows = ['Métrica,Valor'];
+      if (last.tipo === 'lote') {
+        csvRows = ['Inicio,Fin,Total,Hábiles,Inhábiles'];
+        last.resultados.forEach(r => { csvRows.push(`${r.inicio},${r.fin},${r.total},${r.habiles},${r.inhabiles}`); });
+        csvRows.push('Totales,,,' + last.totalGlobal + ',' + last.habGlobal + ',' + last.inhabGlobal);
+      } else {
+        csvRows.push(`Fecha inicio,${last.inicio}`);
+        csvRows.push(`Fecha fin,${last.fin}`);
+        csvRows.push(`Total días,${last.total}`);
+        csvRows.push(`Días hábiles,${last.habiles}`);
+        csvRows.push(`Días inhábiles,${last.inhabiles}`);
+      }
+      const csv = csvRows.join('\n');
+      const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'dias_habiles.csv'; a.click();
+      URL.revokeObjectURL(url); showToast('CSV exportado ✅');
+    }
+    function copiarResultado() {
+      const last = loadLastSearch();
+      if (!last) { showToast('Primero realiza un cálculo'); return; }
+      let text = '';
+      if (last.tipo === 'lote') {
+        text = 'Inicio\tFin\tTotal\tHábiles\tInhábiles\n';
+        last.resultados.forEach(r => { text += `${r.inicio}\t${r.fin}\t${r.total}\t${r.habiles}\t${r.inhabiles}\n`; });
+        text += `\nTotales: ${last.totalGlobal} días, ${last.habGlobal} hábiles, ${last.inhabGlobal} inhábiles`;
+      } else {
+        text = `📅 ${last.inicio} → ${last.fin}\n📊 Total: ${last.total} | Hábiles: ${last.habiles} | Inhábiles: ${last.inhabiles}`;
+      }
+      navigator.clipboard.writeText(text).then(() => showToast('Resultado copiado 📋')).catch(() => showToast('No se pudo copiar'));
+    }
+
+    // ───────────────────────────────────────────────
+    //  Event Listeners
+    // ───────────────────────────────────────────────
+    document.getElementById('pasteInput').addEventListener('paste', function(e) {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text');
+      this.value = text;
+      if (handlePaste(text)) { this.value = ''; }
+    });
+    document.getElementById('pasteInput').addEventListener('input', function() {
+      const text = this.value;
+      if (text.length > 8 && handlePaste(text)) { this.value = ''; }
+    });
+    document.getElementById('pasteZone').addEventListener('click', () => document.getElementById('pasteInput').focus());
+    ['fechaInicio','fechaFin'].forEach(id => {
+      const el = document.getElementById(id);
+      el.addEventListener('paste', function(e) {
+        const text = (e.clipboardData || window.clipboardData).getData('text').trim();
+        const dates = extractDatesFromText(text);
+        if (dates.length >= 1) {
+          e.preventDefault();
+          this.value = dates[0].toISOString().split('T')[0];
+          this.classList.remove('error-input');
+          if (dates.length >= 2 && id==='fechaInicio') {
+            document.getElementById('fechaFin').value = dates[dates.length-1].toISOString().split('T')[0];
+            document.getElementById('fechaFin').classList.remove('error-input');
+          }
+        }
+      });
+      el.addEventListener('change', function() { this.classList.remove('error-input'); });
+      el.addEventListener('keydown', e => { if (e.key==='Enter') calcular(); });
+    });
+    document.getElementById('pasteInput').addEventListener('keydown', e => {
+      if (e.key==='Enter') {
+        const text = document.getElementById('pasteInput').value;
+        if (text.trim() && handlePaste(text)) { document.getElementById('pasteInput').value = ''; }
+      }
+    });
+    document.getElementById('swapBtn').addEventListener('click', () => {
+      const ini = document.getElementById('fechaInicio').value;
+      const fin = document.getElementById('fechaFin').value;
+      document.getElementById('fechaInicio').value = fin;
+      document.getElementById('fechaFin').value = ini;
+      calcular();
+    });
+
+    // Dropdown rápido
+    const dropdown = document.getElementById('quickDropdown');
+    const dropdownBtn = document.getElementById('quickDropdownBtn');
+    const dropdownMenu = document.getElementById('quickDropdownMenu');
+    dropdownBtn.addEventListener('click', (e) => { e.stopPropagation(); dropdown.classList.toggle('open'); });
+    dropdownMenu.addEventListener('click', (e) => {
+      const item = e.target.closest('.quick-dropdown-item');
+      if (!item) return;
+      const range = item.getAttribute('data-range');
+      const today = new Date(); today.setHours(0,0,0,0);
+      let ini, fin;
+      function getMonday(d) { const day = d.getDay(); const diff = d.getDate()-day+(day===0?-6:1); return new Date(d.getFullYear(), d.getMonth(), diff); }
+      switch(range) {
+        case 'today': ini = new Date(today); fin = new Date(today); break;
+        case 'this-week': ini = getMonday(today); fin = new Date(ini); fin.setDate(fin.getDate()+6); break;
+        case 'next-week': ini = getMonday(today); ini.setDate(ini.getDate()+7); fin = new Date(ini); fin.setDate(fin.getDate()+6); break;
+        case 'this-month': ini = new Date(today.getFullYear(), today.getMonth(), 1); fin = new Date(today.getFullYear(), today.getMonth()+1, 0); break;
+        case 'last-month': ini = new Date(today.getFullYear(), today.getMonth()-1, 1); fin = new Date(today.getFullYear(), today.getMonth(), 0); break;
+        case 'this-year': ini = new Date(today.getFullYear(), 0, 1); fin = new Date(today.getFullYear(), 11, 31); break;
+      }
+      if (ini && fin) { setFechas(ini, fin); calcular(); }
+      dropdown.classList.remove('open');
+    });
+    document.addEventListener('click', () => dropdown.classList.remove('open'));
+
+    // Config toggle
+    document.getElementById('configToggle').addEventListener('click', function() {
+      this.classList.toggle('open');
+      document.getElementById('configPanel').classList.toggle('show');
+    });
+
+    // Init
+    function init() {
+      aplicarConfig();
+      const last = loadLastSearch();
+      if (last && last.tipo === 'simple' && last.inicioISO && last.finISO) {
+        document.getElementById('fechaInicio').value = last.inicioISO;
+        document.getElementById('fechaFin').value = last.finISO;
+      } else {
+        const todayD = new Date(); todayD.setHours(0,0,0,0);
+        const laterD = new Date(todayD); laterD.setDate(laterD.getDate()+7);
+        document.getElementById('fechaInicio').value = todayD.toISOString().split('T')[0];
+        document.getElementById('fechaFin').value = laterD.toISOString().split('T')[0];
+      }
+      renderHistory();
+      if (last && last.tipo === 'simple') calcular();
+      else if (last && last.tipo === 'lote' && last.resultados) {
+        // No se puede restaurar automáticamente el lote completo sin el input, pero se deja el historial
+      }
+    }
+    init();
+
+    console.log('✅ Calculadora Pro inicializada.');
+    console.log('📋 Funcionalidades: Pegar una o múltiples líneas, dropdown rápido, cálculo de día único, lote de rangos, configuración avanzada, historial, exportación.');
+  </script>
 </body>
 </html>
