@@ -29,149 +29,131 @@ th { background:#2A5C45; color:#fff }
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// PARSE FECHA (Excel)
-// ─────────────────────────────────────────────
+// ─────────────────────────────
+// PARSE FECHA SEGURO
+// ─────────────────────────────
 function parseFechaTexto(txt) {
-  const m = txt.match(/(\d{2})[-\/](\d{2})[-\/](\d{4})/);
+  const m = txt.match(/^(\d{2})[-\/](\d{2})[-\/](\d{4})$/);
   if (!m) return null;
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 
-// ─────────────────────────────────────────────
-// PEGADO DESDE EXCEL (MULTI FILA)
-// ─────────────────────────────────────────────
-document.addEventListener("paste", function(e) {
-  const texto = e.clipboardData.getData("text");
-  const filas = texto.split(/\r?\n/).filter(f => f.trim());
+// ─────────────────────────────
+// EXTRAER 2 FECHAS EXACTAS
+// ─────────────────────────────
+function extraerFechasDeLinea(linea) {
+  const matches = linea.match(/\d{2}[-\/]\d{2}[-\/]\d{4}/g);
+  if (!matches || matches.length < 2) return null;
 
-  const regex = /\d{2}[-\/]\d{2}[-\/]\d{4}/g;
+  return [
+    parseFechaTexto(matches[0]),
+    parseFechaTexto(matches[1])
+  ];
+}
+
+// ─────────────────────────────
+// PEGADO DESDE EXCEL (CORRECTO)
+// ─────────────────────────────
+document.addEventListener("paste", function(e) {
+  const texto = e.clipboardData.getData("text").trim();
+
+  const filas = texto.split(/\r?\n/).filter(f => f.trim());
   const resultados = [];
 
   filas.forEach(fila => {
-    const m = fila.match(regex);
-    if (!m || m.length < 2) return;
+    const fechas = extraerFechasDeLinea(fila);
+    if (!fechas) return;
 
-    const f1 = parseFechaTexto(m[0]);
-    const f2 = parseFechaTexto(m[1]);
-    if (!f1 || !f2) return;
+    const [inicio, fin] = fechas;
 
-    const calc = calcularRango(f1, f2);
-    if (calc) resultados.push({inicio:f1, fin:f2, ...calc});
+    const calc = calcularRango(inicio, fin);
+    if (calc) {
+      resultados.push({ inicio, fin, ...calc });
+    }
   });
 
+  if (resultados.length === 0) return;
+
+  e.preventDefault();
+
+  // SOLO UNA FILA → comportamiento normal
   if (resultados.length === 1) {
-    e.preventDefault();
     fechaInicio.value = resultados[0].inicio;
     fechaFin.value = resultados[0].fin;
-    calcular();
+    mostrarResultadoIndividual(resultados[0]);
+    return;
   }
 
-  if (resultados.length > 1) {
-    e.preventDefault();
-    mostrarTabla(resultados);
-  }
+  // MULTIPLES FILAS → tabla
+  mostrarTablaResultados(resultados);
 });
 
-// ─────────────────────────────────────────────
-// FERIADOS CHILE
-// ─────────────────────────────────────────────
-function fmtKey(d){
-  return d.toISOString().split('T')[0];
-}
+// ─────────────────────────────
+// CALCULO (CORREGIDO)
+// ─────────────────────────────
+function calcularRango(inicio, fin) {
+  const d1 = new Date(inicio + "T00:00:00");
+  const d2 = new Date(fin + "T00:00:00");
 
-function getEaster(y){
-  const a=y%19,b=Math.floor(y/100),c=y%100;
-  const d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25);
-  const g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30;
-  const i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7;
-  const m=Math.floor((a+11*h+22*l)/451);
-  const month=Math.floor((h+l-7*m+114)/31);
-  const day=((h+l-7*m+114)%31)+1;
-  return new Date(y,month-1,day);
-}
+  if (d2 < d1) return null;
 
-function getFeriados(y){
-  const h = {};
-  const add = (d)=>h[fmtKey(d)]=true;
+  const feriados = buildHolidayMap(d1.getFullYear(), d2.getFullYear());
 
-  [[1,1],[5,1],[5,21],[7,16],[8,15],[9,18],[9,19],[10,31],[11,1],[12,8],[12,25]]
-  .forEach(([m,d])=>add(new Date(y,m-1,d)));
+  let habiles = 0;
+  let inhabiles = 0;
 
-  const easter = getEaster(y);
-  const vs=new Date(easter); vs.setDate(easter.getDate()-2);
-  add(vs);
+  let d = new Date(d1);
+  while (d <= d2) {
+    const dow = d.getDay();
+    const isWeekend = (dow === 0 || dow === 6);
+    const isFeriado = feriados[fmtKey(d)];
 
-  return h;
-}
+    if (isWeekend || isFeriado) inhabiles++;
+    else habiles++;
 
-function buildHolidayMap(y1,y2){
-  const map={};
-  for(let y=y1;y<=y2;y++){
-    Object.assign(map,getFeriados(y));
-  }
-  return map;
-}
-
-// ─────────────────────────────────────────────
-// CALCULO
-// ─────────────────────────────────────────────
-function calcularRango(inicio,fin){
-  const d1=new Date(inicio), d2=new Date(fin);
-  if(d2<d1) return null;
-
-  const feriados=buildHolidayMap(d1.getFullYear(),d2.getFullYear());
-
-  let hab=0, inh=0;
-
-  let d=new Date(d1);
-  while(d<=d2){
-    const dow=d.getDay();
-    const isWeekend=(dow===0||dow===6);
-    const isFeriado=feriados[fmtKey(d)];
-
-    if(isWeekend || isFeriado) inh++;
-    else hab++;
-
-    d.setDate(d.getDate()+1);
+    d.setDate(d.getDate() + 1);
   }
 
-  return {total:hab+inh, habiles:hab, inhabiles:inh};
+  return {
+    total: habiles + inhabiles,
+    habiles,
+    inhabiles
+  };
 }
 
-function calcular(){
-  const i=fechaInicio.value;
-  const f=fechaFin.value;
-
-  const r=calcularRango(i,f);
-  if(!r) return;
-
-  resultado.innerHTML=`
-    <p><b>Total:</b> ${r.total}</p>
-    <p class="hab">Hábiles: ${r.habiles}</p>
-    <p class="inhab">Inhábiles: ${r.inhabiles}</p>
+// ─────────────────────────────
+// RESULTADO INDIVIDUAL
+// ─────────────────────────────
+function mostrarResultadoIndividual(r) {
+  resultado.innerHTML = `
+    <p><b>${r.total} días</b></p>
+    <p style="color:green">${r.habiles} hábiles</p>
+    <p style="color:red">${r.inhabiles} inhábiles</p>
   `;
 }
 
-// ─────────────────────────────────────────────
-// TABLA MULTIPLE
-// ─────────────────────────────────────────────
-function mostrarTabla(data){
-  const rows=data.map(d=>`
+// ─────────────────────────────
+// TABLA MULTIPLE DETALLADA
+// ─────────────────────────────
+function mostrarTablaResultados(data) {
+  const rows = data.map(r => `
     <tr>
-      <td>${d.inicio}</td>
-      <td>${d.fin}</td>
-      <td>${d.total}</td>
-      <td class="hab">${d.habiles}</td>
-      <td class="inhab">${d.inhabiles}</td>
+      <td>${r.inicio}</td>
+      <td>${r.fin}</td>
+      <td><b>${r.total} días</b></td>
+      <td style="color:green">${r.habiles}</td>
+      <td style="color:red">${r.inhabiles}</td>
     </tr>
   `).join('');
 
-  resultado.innerHTML=`
-    <h3>Resultados múltiples</h3>
+  resultado.innerHTML = `
     <table>
       <tr>
-        <th>Inicio</th><th>Fin</th><th>Total</th><th>Hábiles</th><th>Inhábiles</th>
+        <th>Inicio</th>
+        <th>Fin</th>
+        <th>Total</th>
+        <th>Hábiles</th>
+        <th>Inhábiles</th>
       </tr>
       ${rows}
     </table>
